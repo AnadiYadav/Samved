@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NRSC Admin Dashboard</title>
+    <link rel="stylesheet" href="/frontend/static/css/main.css">
+    <link rel="stylesheet" href="/frontend/static/css/admin-dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+        <img src="/frontend/static/images/nrsc-logo.png" alt="NRSC Logo" class="dashboard-logo">
+        <h1>Admin Dashboard</h1>
+        <nav>
+            <button class="btn-logout" onclick="handleLogout()">Logout</button>
+        </nav>
+    </header>
+
+    <!-- Metrics Overview -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3>Total Queries</h3>
+            <div class="metric-value" id="dailyQueries">0</div>
+        </div>
+        <div class="metric-card">
+            <h3>Active Sessions</h3>
+            <div class="metric-value" id="activeSessions">0</div>
+        </div>
+        <div class="metric-card">
+            <h3>Pending Requests</h3>
+            <div class="metric-value" id="pendingRequests">0</div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-main">
+        <!-- Top Row Charts -->
+        <div class="chart-row">
+            <div class="chart-container">
+                <h2>Frequently Asked Questions</h2>
+                <canvas id="faqChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h2>Visitor Statistics</h2>
+                <canvas id="visitorChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Bottom Row Charts -->
+        <div class="chart-row">
+            <div class="chart-container">
+                <h2>Sentiment Analysis</h2>
+                <canvas id="sentimentChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h2>Approval Status</h2>
+                <canvas id="approvalChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Request History Button -->
+        <section class="dashboard-controls">
+            <button class="btn btn-history" onclick="showRequestHistory()">
+                Request History
+            </button>
+        </section>
+
+        <!-- Knowledge Submission Section -->
+        <section class="knowledge-submission">
+            <h2>Update Chatbot Knowledge</h2>
+            <form id="knowledgeForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Title*</label>
+                    <input type="text" id="knowledgeTitle" required 
+                           placeholder="e.g. Satellite Specifications">
+                </div>
+                
+                <div class="form-group">
+                    <label>Type*</label>
+                    <select id="knowledgeType" required onchange="togglePDFField()">
+                        <option value="">Select type</option>
+                        <option value="link">Web Link</option>
+                        <option value="pdf">PDF Document</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="textContentGroup">
+                    <label>Content*</label>
+                    <textarea id="knowledgeContent" rows="5" required 
+                              placeholder="Enter content or URL"></textarea>
+                </div>
+                
+                <div class="form-group" id="pdfContentGroup" style="display:none">
+                    <label>PDF File*</label>
+                    <input type="file" id="knowledgePDF" accept=".pdf">
+                </div>
+                
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="knowledgeDesc" rows="3" 
+                              placeholder="Additional information (optional)"></textarea>
+                </div>
+                
+                <button type="submit" class="btn-submit">Submit for Approval</button>
+            </form>
+        </section>
+    </main>
+
+    <!-- Add this modal at bottom -->
+    <div id="requestHistoryModal" class="nrsc-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📋 Request History</h2>
+                <span class="close-modal" onclick="closeRequestHistory()">&times;</span>
+            </div>
+            
+            <div class="modal-body scroll-container">
+                <table class="nrsc-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestHistoryBody">
+                        <!-- Dynamically populated rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+          
+    <script src="/frontend/static/js/admin-dashboard.js"></script>
+</body>
+</html>

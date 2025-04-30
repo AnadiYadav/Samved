@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NRSC - ISRO</title>
+    <link rel="stylesheet" href="\frontend\static\css\main.css">
+</head>
+<body>
+    <!-- Main Website Header -->
+    <header class="nrsc-header">
+        <img src="/frontend/static/images/nrsc-logo.png" alt="NRSC Logo" class="nrsc-logo">
+        <h1 id="firstheading">National Remote Sensing Centre</h1>
+        <nav class="nrsc-nav">
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Services</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="nrsc-content">
+        <h1 style="font-size:40px;font-style:bold;color:red;text-align:center;">National Remote Sensing Centre</h1>
+    <br>
+        <h2 style="font-size:35px; text-align:center;">About NRSC</h2>
+        <p style="font-size:25px;">National Remote Sensing Centre (NRSC) is one of the primary centres of Indian Space Research Organisation (ISRO), Department of Space (DOS). NRSC  has the mandate for establishment of ground stations for receiving satellite data, generation of data products, dissemination to the users, development of techniques for remote sensing applications including disaster management support, geospatial services for good governance and capacity building for professionals, faculty and students. 
+
+            NRSC operates through multiple campuses to meet national and regional remote sensing data and applications needs of the country.
+            
+            Main Campus at Balanagar,Hyderabad for Administration, Remote Sensing Applications and Aerial Services 
+            The Campus at Shadnagar for Satellite Data Reception, Data Processing and Dissemination, Earth and Climate Studies and Disaster Management Support
+             Five Regional Centres at Sector 9,KBHB in Jodhpur (Regional Centre-West), Sadhiknagar at New Delhi (Regional  Centre-North), New Salt Lake City in Kolkata (Regional Centre-East), Amaravathy Road in Nagpur (Regional Centre-Central), Karthik Nagar in Bangalore (Regional Centre-South) for promoting remote sensing applications for various states.
+            Outreach facility at Jeedimetla in Hyderabad for providing training for professionals, faculty and students and for general outreach.
+             Aircraft operations facility at Begumpet Airport, Hyderabad.
+        </p>
+        <div style="text-align:center;">
+            <h2 style="font-size:35px; text-align:center;">Campuses</h2>
+            <img src="\frontend\static\images\nrsc-campuses.png" alt="Description of image" width="500" height="300">
+        <p style="font-size:25px;text-align:center;">NRSC operates through multiple campuses spread across the country with main campus at Balanagar, Hyderabad, and other campuses at (1) Shadnagar, Ranga Reddy district, (2) Jeedimetla-Hyderabad,(3) Aircraft  operations facility at Begumpet airport  and Five Regional Centres covering different regions of the country (a) Regional Centre-West at Jodhpur, (b) Regional  Centre-North-New Delhi, (c) Regional Centre-East at Kolkata, (d) Regional Centre-Central at Nagpur (e) Regional Centre-South-Bangalore.
+        </p>
+        </div>
+    </main>
+
+    <!-- Chat Widget Container -->
+    <div class="chat-widget">
+        <!-- Welcome Bubble (positioned above chat icon) -->
+        <div class="welcome-bubble">Hi! I'm Samved. Click to chat!</div>
+        
+        <!-- Chat Icon (always visible) -->
+        <div class="chat-icon" onclick="toggleChat()">
+            <img src="/frontend/static/images/chatbot-icon.gif" alt="Chat Icon">
+        </div>
+        
+        <!-- Chat Window (initially hidden) -->
+        <div class="chat-window">
+            <div class="chat-header">
+                <h3 id="click-head">Samved - The Chatbot</h3>
+                <div>
+                    <button onclick="toggleChat()" class="minimize-btn">−</button>
+                    <!--<button onclick="handleAdminLogin()" class="login-btn">Admin Login</button> -->
+                </div>
+            </div>
+            <div class="chat-body" id="chatBody">
+                <div class="message bot-message">Welcome! Ask me about NRSC, ISRO, Remote Sensing, or GIS.</div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="userInput" 
+                       placeholder="Type your question..." 
+                       class="chat-input-field"
+                       onkeypress="handleEnter(event)">
+                <button onclick="sendMessage()" class="send-btn">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="\frontend\static\js\chat2.js"></script>
+</body>
+</html>

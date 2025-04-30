@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NRSC Admin Login</title>
+    <link rel="stylesheet" href="/frontend/static/css/main.css">
+    <link rel="stylesheet" href="/frontend/static/css/admin-login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <img src="/frontend/static/images/nrsc-logo.png" alt="NRSC Logo" class="nrsc-logo">
+            <h2>NRSC Secure Admin Portal</h2>
+        </div>
+        
+        <form class="login-form" id="adminLoginForm">
+            <div class="form-group">
+                <label for="loginEmail" class="required">Official Email</label>
+                <input type="email" id="loginEmail" required 
+                       class="input-field"
+                       placeholder="name@nrsc.gov.in"
+                       autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPassword" class="required">Password</label>
+                <input type="password" id="loginPassword" required
+                       class="input-field"
+                       placeholder="••••••••"
+                       minlength="8"
+                       autocomplete="current-password">
+            </div>
+            
+            <button type="submit" class="login-btn">Secure Login</button>
+        </form>
+        
+        <p class="security-note">🔒 All login attempts are monitored</p>
+    </div>
+
+    <script src="/frontend/static/js/auth.js" type="module"></script>
+</body>
+</html>

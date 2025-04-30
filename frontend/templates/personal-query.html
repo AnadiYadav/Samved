@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NRSC Personal Query Form</title>
+    <link rel="stylesheet" href="/frontend/static/css/personal-query.css">
+</head>
+<body>
+    <div class="nrsc-query-container">
+        <div class="nrsc-query-header">
+            <img src="/frontend/static/images/nrsc-logo.png" alt="NRSC Logo" class="form-logo">
+            <h2>Personal Query Form</h2>
+        </div>
+        <div class="security-notice">
+            <strong>Security Note:</strong> 
+            <ul>
+                <li>Your query will open in your default email client</li>
+                <li>No information is stored or transmitted automatically</li>
+                <li>You must manually send the email after verification</li>
+                <li>You can also mail directly to data@nrsc.gov.in</li>
+            </ul>
+        </div>
+        <form id="queryForm" class="nrsc-query-form">
+            <div class="form-group">
+                <label for="email">Your Email Address</label>
+                <input type="email" id="email" name="email" 
+                       required
+                       placeholder="Enter official/organization email"
+                       pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$">
+            </div>
+
+            <div class="form-group">
+                <label for="sessionId">Session ID</label>
+                <input type="text" id="sessionId" name="sessionId" 
+                       readonly class="disabled-field">
+            </div>
+
+            <div class="form-group">
+                <label for="question">Your Question</label>
+                <textarea id="question" name="question" 
+                          required rows="4"
+                          placeholder="Edit your question if needed"></textarea>
+            </div>
+
+            <button type="submit" class="nrsc-submit-btn">Submit Query</button>
+        </form>
+
+        <div id="statusMessage" class="status-message"></div>
+    </div>
+
+    <script src="/frontend/static/js/personal-query.js"></script>
+</body>
+</html>

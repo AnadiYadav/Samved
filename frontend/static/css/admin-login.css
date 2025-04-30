@@ -1,0 +1,101 @@
+body {
+    background: linear-gradient(135deg, var(--isro-dark) 0%, var(--isro-blue) 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    margin: 0;
+}
+
+.login-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    padding: 40px;
+    width: 100%;
+    max-width: 450px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.login-header img {
+    height: 80px;
+    margin-bottom: 20px;
+}
+
+.login-header h2 {
+    color: var(--isro-dark);
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+    max-width: 400px;
+    margin: 10px 10px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 100%;
+}
+
+label {
+    color: var(--isro-dark);
+    font-weight: 500;
+}
+
+.input-field {
+    width: 100%;
+    padding: 14px 20px;
+    border: 2px solid var(--isro-blue);
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    margin-left: 0px;
+}
+
+.input-field:focus {
+    border-color: var(--isro-orange);
+    box-shadow: 0 0 12px rgba(255,103,31,0.2);
+}
+
+.login-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--isro-orange);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+    margin-left: 1.3rem;
+}
+
+.login-btn:hover {
+    background: #e55b1a;
+    transform: translateY(-2px);
+}
+
+.security-note {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.required::after {
+    content: " *";
+    color: red;
+}

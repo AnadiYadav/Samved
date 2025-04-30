@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NRSC Superadmin Dashboard</title>
+    <link rel="stylesheet" href="/frontend/static/css/main.css">
+    <link rel="stylesheet" href="/frontend/static/css/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+        <img src="/frontend/static/images/nrsc-logo.png" alt="NRSC Logo" class="dashboard-logo">
+        <h1>Superadmin Dashboard</h1>
+        <nav>
+            <button class="btn-logout" onclick="handleLogout()">Logout</button>
+        </nav>
+    </header>
+
+    <!-- Metrics Overview -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3>Total Queries</h3>
+            <div class="metric-value" id="dailyQueries">0</div>
+        </div>
+        <div class="metric-card">
+            <h3>Active Sessions</h3>
+            <div class="metric-value" id="activeSessions">0</div>
+        </div>
+        <div class="metric-card">
+            <h3>Pending Approvals</h3>
+            <div class="metric-value" id="pendingApprovals">0</div>
+        </div>
+        <div class="metric-card">
+            <h3>Total Admins</h3>
+            <div class="metric-value" id="totalAdmins">0</div>
+        </div>
+    </div>
+
+
+    <!-- Main Content Area -->
+    <main class="dashboard-main">
+        <!-- Top Row Charts -->
+        <div class="chart-row">
+            <div class="chart-container">
+                <h2>Frequently Asked Questions</h2>
+                <canvas id="faqChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h2>Pending Requests</h2>
+                <canvas id="approvalChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Bottom Row Charts -->
+        <div class="chart-row">
+            <div class="chart-container">
+                <h2>Sentiment Analysis</h2>
+                <canvas id="sentimentChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h2>Visitor Statistics</h2>
+                <canvas id="visitorChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Admin Management Section -->
+        <section class="admin-management">
+            <div class="admin-actions">
+                <button class="btn-primary" onclick="showAdminForm()">
+                    <span>+</span> Add New Admin
+                </button>
+                <button class="btn-primary" onclick="showRequestHistory()">
+                    Request History
+                </button>
+                <button class="btn-primary" onclick="showInformationForm()">
+                    <span>+</span> Add New Information
+                </button>
+            </div>
+            
+            <!-- Pending Requests Table -->
+            <div class="requests-table">
+                <h2>Pending Requests (<span id="pendingCount">15</span>)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Admin Name</th>
+                            <th>Request Type</th>
+                            <th>Date Submitted</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsBody">
+                        <!-- Dynamically populated -->
+                    </tbody>
+                </table>
+            </div>
+
+        <!-- Request History Modal Section-->
+            <div id="historyModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeHistoryModal()">&times;</span>
+                    <h2>Request Decision History</h2>
+                    <div class="requests-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Admin</th>
+                                    <th>Request Title</th>
+                                    <th>Type</th>
+                                    <th>Decision</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Add Admin Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Create New Admin</h2>
+            <form id="adminForm">
+                <div class="form-group">
+                    <label>Official Email</label>
+                    <input type="email" id="adminEmail" required 
+                           placeholder="name@nrsc.gov.in">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="adminPassword" required
+                           placeholder="••••••••" 
+                           minlength="8">
+                </div>
+                <div class="form-group">
+                    <label>Access Level</label>
+                    <select id="adminRole" required>
+                        <option value="admin">Admin</option>
+                        <option value="superadmin">Superadmin</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit">Create Admin</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Information Modal -->
+
+    <div id="informationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeInformationModal()">&times;</span>
+            <h2>Add New Knowledge Content</h2>
+            <form id="informationForm">
+                <div class="form-group">
+                    <label>Content Type*</label>
+                    <select id="infoType" required onchange="toggleInfoField()">
+                        <option value="">Select type</option>
+                        <option value="link">Web Link</option>
+                        <option value="pdf">PDF Document</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="urlFieldGroup" style="display:none">
+                    <label>Web URL*</label>
+                    <input type="url" id="infoUrl" 
+                        placeholder="https://example.com"
+                        pattern="https?://.+">
+                </div>
+                
+                <div class="form-group" id="pdfFieldGroup" style="display:none">
+                    <label>PDF File*</label>
+                    <input type="file" id="infoPdf" accept=".pdf">
+                </div>
+
+                <button type="submit" class="btn-submit">Add to Knowledge Base</button>
+            </form>
+        </div>
+    </div>
+
+<!-- Progress Tracking Section -->
+<div class="processing-overlay" id="processingOverlay">
+    <div class="processing-card">
+        <h3>🛰️ Processing Status</h3>
+        <div class="progress-container">
+            <div class="progress-bar" id="mainProgressBar"></div>
+            <span id="progressText">0%</span>
+        </div>
+        <div class="stats-container">
+            <div class="stat-item">
+                <span class="stat-label">Total Links</span>
+                <span class="stat-value" id="totalLinks">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Processed</span>
+                <span class="stat-value" id="processedLinks">0</span>
+            </div>
+        </div>
+        <div class="link-list" id="processingList"></div>
+        <button class="btn-cancel" onclick="cancelProcessing()">Cancel Processing</button>
+    </div>
+</div>
+
+<section class="processing-history">
+    <h3>📚 Processing History</h3>
+    <div class="history-list" id="jobsList">
+        <!-- Dynamic content will be inserted here -->
+    </div>
+</section> 
+
+
+<!-- Error Handling Toast -->
+<div id="scrapingStatus" class="status-toast">
+    <div class="toast-content"></div>
+    <div class="progress-bar"></div>
+</div>
+
+<style>
+        /* Enhanced error styling */
+        .status-toast.error {
+            background: #dc3545;
+            animation: error-pulse 1.5s infinite;
+        }
+        
+        @keyframes error-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+    
+    .status-toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--isro-dark);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        display: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        max-width: 400px;
+    }
+    
+    .toast-content {
+        margin-bottom: 0.5rem;
+    }
+    
+    
+    .processing-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: none;
+        z-index: 9999;
+        padding: 2rem;
+        overflow-y: auto;
+    }
+
+    .processing-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .progress-container {
+        position: relative;
+        height: 25px;
+        background: #f0f0f0;
+        border-radius: 5px;
+        margin: 1rem 0;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: var(--isro-blue);
+        border-radius: 5px;
+        transition: width 0.3s ease;
+    }
+
+    #progressText {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: var(--isro-dark);
+        font-weight: bold;
+    }
+
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+
+    .stat-item {
+        background: var(--isro-light);
+        padding: 1rem;
+        border-radius: 5px;
+        text-align: center;
+    }
+
+    .link-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+
+    .historical-jobs {
+        margin-top: 2rem;
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+    }
+
+    .status-message {
+        padding: 8px;
+        margin: 4px 0;
+        background: #f8f9fa;
+        border-left: 4px solid #0066b2;
+    }
+    
+    .delete-job {
+        background: transparent;
+        border: none;
+        color: #dc3545;
+        cursor: pointer;
+        font-size: 1.5rem;
+        line-height: 1;
+    }
+
+    .job-item {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+    <style>
+        .processing-history {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+    
+        .history-item {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-left: 4px solid;
+            background: #f8f9fa;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    
+        .history-item.completed { border-color: #4CAF50; }
+        .history-item.partial { border-color: #FFC107; }
+        .history-item.failed { border-color: #F44336; }
+    
+        .job-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+    
+        .job-id {
+            font-family: monospace;
+            color: var(--isro-dark);
+        }
+    
+        .job-status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    
+        .status-completed { background: #e8f5e9; color: #2e7d32; }
+        .status-partial { background: #fff8e1; color: #f9a825; }
+        .status-failed { background: #ffebee; color: #c62828; }
+    
+        .delete-history {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0 0.5rem;
+        }
+</style>
+
+    <script src="/frontend/static/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+:root {
+    --isro-blue: #0066b2;
+    --isro-orange: #FF671F;
+    --isro-white: #FFFFFF;
+    --isro-dark: #0A2948;
+    --isro-light-blue: #E3F2FD;
+}
+
+/* ========== NRSC Header Styles ========== */
+.nrsc-header {
+    background: var(--isro-dark);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.nrsc-logo {
+    height: 65px;
+}
+
+.nrsc-nav a {
+    color: var(--isro-white);
+    text-decoration: none;
+    margin-left: 2rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nrsc-nav a:hover {
+    color: var(--isro-orange);
+}
+
+#firstheading{
+    font-size: 30px;
+    color: antiquewhite;
+    padding-left: 0px;
+    margin-left: 0em;
+}
+
+/* ========== Chat Widget Styles ========== */
+.chat-widget {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 15px;
+}
+
+/* Chat Icon (always at bottom right) */
+.chat-icon {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    background: var(--isro-blue);
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.chat-icon:hover {
+    transform: scale(1.05);
+}
+
+.chat-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Welcome Message (above chat icon) */
+.welcome-bubble {
+    position: absolute;
+    bottom: calc(100% + 15px);
+    right: 0;
+    background: var(--isro-orange);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    width: 220px;
+    text-align: center;
+}
+
+.welcome-bubble.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Chat Window (appears above chat icon) */
+.chat-window {
+    position: absolute;
+    bottom: calc(100% + 15px);
+    right: 0;
+    width: 420px;
+    max-width: 90vw;
+    height: 65vh;
+    min-height: 400px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    transform: scale(0);
+    transform-origin: bottom right;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-window.active {
+    transform: scale(1);
+}
+
+/* ========== Chat Window Components ========== */
+.chat-header {
+    background: linear-gradient(135deg, var(--isro-blue) 0%, var(--isro-dark) 100%);
+    padding: 1.2rem;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    flex-shrink: 0;
+}
+
+.chat-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+/* Chat Body with Scrollable Messages */
+.chat-body {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    background: var(--isro-light-blue);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Input Area (Sticky at bottom) */
+.chat-input {
+    padding: 1.2rem;
+    background: white;
+    border-top: 2px solid #e0e0e0;
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* ========== Input & Button Layout ========== */
+.chat-input-field {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid var(--isro-blue);
+    border-radius: 25px;
+    outline: none;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: var(--isro-white);
+}
+
+.send-btn {
+    background: var(--isro-blue);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.send-btn:hover {
+    background: #005699;
+    transform: scale(1.05);
+}
+
+/* ========== Message Bubbles ========== */
+.message {
+    max-width: 80%;
+    padding: 1rem 1.5rem;
+    border-radius: 1.5rem;
+    line-height: 1.4;
+    animation: messageAppear 0.3s ease;
+}
+.retry-notice {
+    color: #666;
+    font-size: 0.8em;
+    margin-top: 5px;
+    font-style: italic;
+}
+.error-message {
+    color: #d32f2f;
+    background-color: #ffebee;
+}
+
+@keyframes messageAppear {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.user-message {
+    background: var(--isro-blue);
+    color: white;
+    margin-left: auto;
+    border-radius: 1.5rem 1.5rem 0 1.5rem;
+}
+
+.bot-message {
+    background: white;
+    color: var(--isro-dark);
+    border: 2px solid var(--isro-blue);
+    border-radius: 1.5rem 1.5rem 1.5rem 0;
+}
+
+/* ========== Button Styles ========== */
+.login-btn {
+    background: var(--isro-orange);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    background: #e55b1a;
+    transform: translateY(-1px);
+}
+
+.minimize-btn {
+    background: var(--isro-blue);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.minimize-btn:hover {
+    background: #005699;
+    transform: rotate(180deg);
+}
+
+/* ========== Responsive Design ========== */
+@media (max-width: 768px) {
+    .chat-window {
+        height: 70vh;
+        bottom: calc(100% + 10px);
+    }
+    
+    .chat-icon {
+        width: 65px;
+        height: 65px;
+    }
+    
+    .welcome-bubble {
+        bottom: calc(100% + 10px);
+        width: 200px;
+    }
+    
+    .chat-input {
+        padding: 1rem;
+    }
+    
+    .chat-input-field {
+        padding: 10px 15px;
+    }
+    
+    .send-btn {
+        padding: 10px 20px;
+    }
+}
