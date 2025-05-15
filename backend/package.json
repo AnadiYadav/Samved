@@ -6,8 +6,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-
-
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -25,7 +23,8 @@
     "mysql2": "^3.14.0",
     "node-fetch": "^3.3.2",
     "ora": "^5.4.1",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "undici": "^7.8.0"
   },
   "devDependencies": {
     "@gradio/client": "^1.14.2"

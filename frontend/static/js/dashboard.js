@@ -90,82 +90,159 @@ function initializeCharts() {
         }
     });
 
-    // Approval Status Chart 
-    const approvalCtx = document.getElementById('approvalChart').getContext('2d');
-    new Chart(approvalCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Approved', 'Pending', 'Rejected'],
-            datasets: [{
-                data: [70, 15, 15],
-                backgroundColor: ['#4CAF50', '#FFC107', '#F44336']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom' }
+    // APPROVAL CHART INITIALIZATION ====================
+    initializeApprovalChart();
+    let approvalChartInstance = null;
+
+    async function initializeApprovalChart() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/superadmin/approval-stats`, {
+            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
             }
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch approval data');
+        const { data } = await response.json();
+
+        // Destroy previous instance
+        if (approvalChartInstance) {
+            approvalChartInstance.destroy();
         }
-    });
 
-    // Sentiment Analysis Chart
-const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
-
-// Get CSS variables properly
-const style = getComputedStyle(document.documentElement);
-const successGreen = style.getPropertyValue('--success-green').trim();
-const warningYellow = style.getPropertyValue('--warning-yellow').trim();
-const errorRed = style.getPropertyValue('--error-red').trim();
-
-new Chart(sentimentCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Positive', 'Neutral', 'Negative'],
-        datasets: [{
-            data: [65, 25, 10],
-            backgroundColor: [
-                hexToRGBA(successGreen, 0.8),
-                hexToRGBA(warningYellow, 0.8),
-                hexToRGBA(errorRed, 0.8)
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { 
-                position: 'bottom',
-                labels: {
-                    font: {
-                        size: 14
+        // Create new chart with real data
+        const ctx = document.getElementById('approvalChart').getContext('2d');
+        approvalChartInstance = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Approved', 'Pending', 'Rejected'],
+                datasets: [{
+                    data: [
+                        data.approved || 0,
+                        data.pending || 0,
+                        data.rejected || 0
+                    ],
+                    backgroundColor: ['#03A31C', '#FFC107', 'red']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            generateLabels: (chart) => {
+                                return chart.data.datasets[0].data.map((value, index) => ({
+                                    text: `${chart.data.labels[index]}: ${value}`,
+                                    fillStyle: chart.data.datasets[0].backgroundColor[index]
+                                }));
+                            }
+                        }
                     }
                 }
             }
-        },
-        cutout: '70%'
-    }
-});
+        });
 
-function hexToRGBA(hex, alpha = 1) {
-    hex = hex.replace('#', '');
-    if (hex.length === 3) {
-        hex = hex.split('').map(char => char + char).join('');
+    } catch (error) {
+        console.error('Approval chart error:', error);
+        initializeFallbackApprovalChart();
     }
+}
+
+    function initializeFallbackApprovalChart() {
+        const ctx = document.getElementById('approvalChart').getContext('2d');
+        if (approvalChartInstance) approvalChartInstance.destroy();
+        
+        approvalChartInstance = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Approved', 'Pending', 'Rejected'],
+                datasets: [{
+                    data: [0, 0, 0],
+                    backgroundColor: ['#03A31C', '#FFC107', 'red']
+                }]
+            }
+        });
+}
+
     
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
+    // Get CSS variables properly
+    const style = getComputedStyle(document.documentElement);
+    const successGreen = style.getPropertyValue('--success-green').trim();
+    const warningYellow = style.getPropertyValue('--warning-yellow').trim();
+    const errorRed = style.getPropertyValue('--error-red').trim();
     
-    // Validate values
-    if (isNaN(r) || isNaN(g) || isNaN(b)) {
-        console.error('Invalid hex color:', hex);
-        return `rgba(0, 0, 0, ${alpha})`; // Fallback to black
+    // SENTIMENT CHART ====================
+initializeSentimentChart();
+
+let superadminSentimentChart = null;
+
+async function initializeSentimentChart() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/superadmin/sentiment`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+        const { data } = await response.json();
+
+        if (superadminSentimentChart) superadminSentimentChart.destroy();
+
+        const ctx = document.getElementById('sentimentChart').getContext('2d');
+        superadminSentimentChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Sentiment Score',
+                    data: data.scores,
+                    backgroundColor: data.scores.map(score => {
+                        if (score >= 0.7) return '#03A31C';
+                        if (score >= 0.4) return '#FFC107';
+                        return '#F44336';
+                    }),
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        max: 1.0,
+                        title: { text: 'Sentiment Score' }
+                    },
+                    x: {
+                        title: { text: 'Recent Queries' }
+                    }
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error:', error);
+        showErrorToast('Failed to load data');
+        initializeFallbackChart();
     }
-    
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function initializeFallbackChart() {
+    const ctx = document.getElementById('sentimentChart').getContext('2d');
+    if (superadminSentimentChart) superadminSentimentChart.destroy();
+    superadminSentimentChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: [], datasets: [] },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
 }
 
     // Visitor Statistics Chart 
@@ -256,7 +333,6 @@ async function loadPendingRequests() {
 function updateApprovalChart(pendingCount) {
     const chart = Chart.getChart('approvalChart');
     if (chart) {
-        chart.data.datasets[0].data = [70, pendingCount, 15];
         chart.update();
     }
 }
@@ -390,24 +466,22 @@ async function loadRequestHistory() {
             credentials: 'include'
         });
         const { requests } = await response.json();
-        
         const tbody = document.getElementById('historyBody');
         tbody.innerHTML = requests.map(request => `
             <tr>
-                <td>${request.admin_email}</td>
-                <td>${request.title}</td>
-                <td>${request.type.toUpperCase()}</td>
-                <td><span class="decision-${request.status}">${request.decision}</span></td>
-                <td>${new Date(request.decision_at).toLocaleDateString('en-IN')}</td>
+            <td>${request.admin_email}</td>
+            <td>${request.title}</td>
+            <td>${request.type.toUpperCase()}</td>
+            <td><span class="decision-${request.status}">${request.decision}</span></td>
+            <td>${new Date(request.decision_at).toLocaleDateString('en-IN')}</td>
             </tr>
-        `).join('');
+            `).join('');
     } catch (error) {
         console.error('Request history error:', error);
     }
 }
 
-// ==================== DAILY QUERIES (SUPERADMIN) ====================
-// ==================== COMPLETE DAILY QUERIES HANDLER ====================
+
 // ==================== TOTAL QUERIES HANDLER ====================
 async function loadTotalQueries() {
     const totalElement = document.getElementById('dailyQueries');
@@ -449,21 +523,15 @@ async function loadTotalQueries() {
     }
 }
 
-// Handle Information Submission from direct form
-// Handle Information Submission
-// Handle Information Submission
-// Handle Information Submission
-// Processing state variables
-// let currentJobId = null;
+
 let isProcessing = false;
 
 // ==================== INFORMATION SUBMISSION HANDLER ====================
-// ==================== INFORMATION SUBMISSION HANDLER ====================
+
 document.getElementById('informationForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const PROXY_URL = 'http://localhost:3001/proxy';
     const statusElement = document.getElementById('scrapingStatus');
-    const progressBar = statusElement.querySelector('.progress-bar');
 
     try {
         const contentType = document.getElementById('infoType').value;
@@ -472,15 +540,12 @@ document.getElementById('informationForm').addEventListener('submit', async (e) 
             return;
         }
 
-        // Reset UI
         statusElement.style.display = 'block';
-        progressBar.style.width = '0%';
-        document.getElementById('processingList').innerHTML = '';
+        statusElement.querySelector('.toast-content').textContent = 'Initializing processing...';
 
         if (contentType === 'link') {
             const url = document.getElementById('infoUrl').value;
             
-            // Validate URL
             try {
                 new URL(url);
             } catch {
@@ -488,83 +553,16 @@ document.getElementById('informationForm').addEventListener('submit', async (e) 
                 return;
             }
 
-            // Step 1: Get links through proxy
-            statusElement.querySelector('.toast-content').textContent = 'Analyzing website structure...';
-            
-            const scrapeResponse = await fetch(`${PROXY_URL}/scrape-url`, {
+            const response = await fetch(`${PROXY_URL}/initiate-processing`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    'base-html': url,  // Correct key with hyphen
-                    'perm-url': url    // Correct key with hyphen
-                })
+                body: JSON.stringify({ url: url })
             });
+
+            if (!response.ok) throw new Error('Failed to start processing');
             
-            if (!scrapeResponse.ok) {
-                const error = await scrapeResponse.json().catch(() => ({ detail: 'Website analysis failed' }));
-                throw new Error(error.detail);
-            }
-
-            const { pdf_links = [], all_links = [] } = await scrapeResponse.json();
-            const totalLinks = all_links.length + pdf_links.length;
-            let successCount = 0;
-            let errorCount = 0;
-            
-            // Process HTML links
-            if (all_links.length > 0) {
-                for (const link of all_links) {
-                    try {
-                        await fetch(`${PROXY_URL}/scrape-page`, {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({
-                                url: link,
-                                'scrape-images': false  // Correct key with hyphen
-                            })
-                        });
-                        successCount++;
-                    } catch (error) {
-                        errorCount++;
-                        console.error(`Failed to process ${link}:`, error);
-                    }
-                }
-            }
-
-            // Process PDF links
-            if (pdf_links.length > 0) {
-                for (const link of pdf_links) {
-                    try {
-                        await fetch(`${PROXY_URL}/scrape-pdf`, {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({
-                                url: link,
-                                'scrape-image': false  // Correct key with hyphen
-                            })
-                        });
-                        successCount++;
-                    } catch (error) {
-                        errorCount++;
-                        console.error(`Failed to process ${link}:`, error);
-                    }
-                }
-            }
-
-            // Store result in localStorage
-            // Inside your informationForm submit handler, replace the job creation with:
-                const jobResult = {
-                    id: Date.now(),
-                    timestamp: new Date().toISOString(),
-                    url: contentType === 'link' ? document.getElementById('infoUrl').value : 'PDF Upload',
-                    total: totalLinks,
-                    success: successCount,
-                    failed: errorCount,
-                    status: errorCount === 0 ? 'completed' : 
-                        errorCount === totalLinks ? 'failed' : 'partial'
-                };
-                updateProcessingHistory(jobResult);
-            statusElement.querySelector('.toast-content').textContent = 
-                `Processed ${successCount} links successfully (${errorCount} failed)!`;
+            const { jobId } = await response.json();
+            statusElement.querySelector('.toast-content').textContent = 'Processing started on server';
 
         } else if (contentType === 'pdf') {
             const fileInput = document.getElementById('infoPdf');
@@ -573,8 +571,6 @@ document.getElementById('informationForm').addEventListener('submit', async (e) 
                 return;
             }
 
-            statusElement.querySelector('.toast-content').textContent = 'Uploading PDF...';
-            
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
 
@@ -583,11 +579,7 @@ document.getElementById('informationForm').addEventListener('submit', async (e) 
                 body: formData
             });
 
-            if (!response.ok) {
-                const error = await response.json().catch(() => ({ detail: 'PDF processing failed' }));
-                throw new Error(error.detail);
-            }
-
+            if (!response.ok) throw new Error('PDF processing failed');
             statusElement.querySelector('.toast-content').textContent = 'PDF processed successfully!';
         }
 
@@ -597,7 +589,6 @@ document.getElementById('informationForm').addEventListener('submit', async (e) 
         }, 3000);
 
     } catch (error) {
-        console.error('Processing Error:', error);
         statusElement.querySelector('.toast-content').textContent = `Error: ${error.message}`;
         statusElement.classList.add('error');
         setTimeout(() => statusElement.style.display = 'none', 5000);

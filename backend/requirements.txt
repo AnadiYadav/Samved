@@ -1,0 +1,13 @@
+bcryptjs        
+cookie-parser             
+cors         
+dotenv       
+express-rate-limit       
+express-validator      
+helmet      
+jsonwebtoken      
+multer      
+mysql2     
+ora@5.4.1
+path       
+undici

@@ -93,29 +93,77 @@ async function initializeCharts() {
         }
     });
 
-    // Sentiment Analysis Chart
-    const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
-    const style = getComputedStyle(document.documentElement);
-    new Chart(sentimentCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Positive', 'Neutral', 'Negative'],
-            datasets: [{
-                data: [65, 25, 10],
-                backgroundColor: [
-                    style.getPropertyValue('--success-green'),
-                    style.getPropertyValue('--warning-yellow'),
-                    style.getPropertyValue('--error-red')
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom' } },
-            cutout: '70%'
-        }
+    // ==================== SENTIMENT CHART INITIALIZATION ====================
+    initializeSentimentChart();
+    
+let adminSentimentChart = null;
+
+async function initializeSentimentChart() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/sentiment`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+        const { data } = await response.json();
+
+        if (adminSentimentChart) adminSentimentChart.destroy();
+
+        const ctx = document.getElementById('sentimentChart').getContext('2d');
+        adminSentimentChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Sentiment Score',
+                    data: data.scores,
+                    backgroundColor: data.scores.map(score => {
+                        if (score >= 0.7) return '#03A31C';
+                        if (score >= 0.4) return '#FFC107';
+                        return '#F44336';
+                    }),
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        max: 1.0,
+                        title: { text: 'Sentiment Score' }
+                    },
+                    x: {
+                        title: { text: 'Recent Queries' }
+                    }
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error:', error);
+        showErrorToast('Failed to load data');
+        initializeFallbackChart();
+    }
+}
+
+function initializeFallbackChart() {
+    const ctx = document.getElementById('sentimentChart').getContext('2d');
+    if (adminSentimentChart) adminSentimentChart.destroy();
+    adminSentimentChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: [], datasets: [] },
+        options: { responsive: true, maintainAspectRatio: false }
     });
+}
+
 
      // Fetch real approval stats from API
      const statsResponse = await fetch(`${API_BASE_URL}/my-approval-stats`, {
@@ -135,7 +183,7 @@ async function initializeCharts() {
                     statsData.data.pending || 0,
                     statsData.data.rejected || 0
                 ],
-                backgroundColor: ['#4CAF50', '#FFC107', '#F44336']
+                backgroundColor: ['#03A31C', '#FFC107', '#F44336']
             }]
         },
         options: {
@@ -241,7 +289,7 @@ function getAuthToken() {
     return cookie ? cookie.split('=')[1] : null;
 }
 
-// ==================== ADMIN DAILY QUERIES ====================
+// ==================== ADMIN Total QUERIES ====================
 // ==================== COMPLETE DAILY QUERIES HANDLER ====================
 async function loadTotalQueries() {
     const dailyElement = document.getElementById('dailyQueries');
@@ -368,6 +416,21 @@ function togglePDFField() {
     document.getElementById('knowledgeContent').required = type !== 'pdf';
     document.getElementById('knowledgePDF').required = type === 'pdf';
 }
+
+
+// ==================== ERROR TOAST HANDLER ====================
+function showErrorToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'error-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+
 
 // Logout Handler
 function handleLogout() {

@@ -3,6 +3,12 @@ const cors = require('cors');
 const app = express();
 const ora = require('ora');
 const chalk = require('chalk');
+const fs = require('fs');
+const path = require('path');
+const Undici = require('undici');
+
+// Add this map to track active jobs
+const activeJobs = new Map();
 
 
 app.use(cors());
@@ -39,51 +45,79 @@ app.post('/proxy/ask', async (req, res) => {
 // New endpoint for scrape-url
 app.post('/proxy/scrape-url', async (req, res) => {
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3600000); // 1 hour timeout
+        
         const response = await fetch('http://0.0.0.0:7860/scrape-url', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(req.body)
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(req.body),
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         const data = await response.json();
-        console.log('Scrape-URL Response:', data); // Log the response
+        console.log('Scrape-URL Response:', data);
         res.json(data);
     } catch (error) {
         console.error('Scrape-URL Error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ 
+            error: error.name === 'AbortError' ? 
+            'Request timed out after 1 hour' : 
+            error.message 
+        });
     }
 });
 
-// New endpoint for scrape-page
 app.post('/proxy/scrape-page', async (req, res) => {
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3600000);
+        
         const response = await fetch('http://0.0.0.0:7860/scrape-page', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(req.body)
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                url: req.body.url,
+                'scrape-images': false 
+            }),
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         res.json(await response.json());
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ 
+            error: error.name === 'AbortError' ? 
+            'Processing timeout' : 
+            error.message 
+        });
     }
 });
 
-// New endpoint for scrape-pdf
 app.post('/proxy/scrape-pdf', async (req, res) => {
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3600000);
+        
         const response = await fetch('http://0.0.0.0:7860/scrape-pdf', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(req.body)
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                url: req.body.url,
+                'scrape-image': false 
+             }),
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         res.json(await response.json());
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ 
+            error: error.name === 'AbortError' ? 
+            'PDF processing timeout' : 
+            error.message 
+        });
     }
 });
 
@@ -100,7 +134,109 @@ app.post('/proxy/scrape-pdf-file', async (req, res) => {
     }
 });
 
+// New endpoint to initiate processing
+app.post('/proxy/initiate-processing', async (req, res) => {
+    try {
+        const { url } = req.body;
+        const jobId = `job-${Date.now()}`;
+        const tempFilePath = path.join(__dirname, 'temp', `${jobId}.json`);
 
+        // Create temp directory if not exists
+        if (!fs.existsSync(path.join(__dirname, 'temp'))) {
+            fs.mkdirSync(path.join(__dirname, 'temp'));
+        }
+
+        // Step 1: Get links
+        const linksResponse = await fetch('http://0.0.0.0:7860/scrape-url', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ url }),
+            dispatcher: new Undici.Agent({
+                headersTimeout: 3600000,
+                bodyTimeout: 3600000
+            })
+        });
+
+        const { pdf_links = [], all_links = [] } = await linksResponse.json();
+        
+        // Save links to temp file
+        fs.writeFileSync(tempFilePath, JSON.stringify({
+            pdf: pdf_links,
+            html: all_links,
+            processed: 0,
+            total: pdf_links.length + all_links.length
+        }));
+
+        // Start background processing
+        processLinks(jobId, tempFilePath);
+
+        res.json({ jobId });
+        
+        console.log(`\n=== NEW PROCESSING JOB ${jobId} ===`);
+        console.log(`🌐 Source URL: ${url}`);
+        console.log(`📁 Temp file: ${tempFilePath}`);
+        console.log(`📊 Total links: ${pdf_links.length + all_links.length}`);
+
+    } catch (error) {
+        console.error('Initiation Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Background processing function
+async function processLinks(jobId, filePath) {
+    try {
+        const jobData = JSON.parse(fs.readFileSync(filePath));
+        let processedCount = 0;
+
+        const processLink = async (url, type) => {
+            try {
+                const endpoint = type === 'pdf' ? 'scrape-pdf' : 'scrape-page';
+                await fetch(`http://0.0.0.0:7860/${endpoint}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ url }),
+                    dispatcher: new Undici.Agent({
+                        headersTimeout: 3600000,
+                        bodyTimeout: 3600000
+                    })
+                });
+                
+                processedCount++;
+                console.log(`✅ [${jobId}] Processed ${type.toUpperCase()} ${processedCount}/${jobData.total}: ${url}`);
+                
+                // Update progress file
+                fs.writeFileSync(filePath, JSON.stringify({
+                    ...jobData,
+                    processed: processedCount
+                }));
+
+            } catch (error) {
+                console.error(`❌ [${jobId}] Failed ${type.toUpperCase()} ${processedCount + 1}/${jobData.total}: ${url}\nREASON: ${error.message}`);
+            }
+        };
+
+        // Process HTML links
+        for (const url of jobData.html) {
+            await processLink(url, 'html');
+        }
+
+        // Process PDF links
+        for (const url of jobData.pdf) {
+            await processLink(url, 'pdf');
+        }
+
+        // Cleanup
+        fs.unlinkSync(filePath);
+        console.log(`\n=== JOB COMPLETE ${jobId} ===`);
+        console.log(`✅ Successfully processed ${processedCount}/${jobData.total} links`);
+        console.log(`🗑️  Deleted temp file: ${filePath}`);
+
+    } catch (error) {
+        console.error(`\n‼️ JOB FAILED ${jobId}: ${error.message}`);
+        fs.unlinkSync(filePath);
+    }
+}
 
 app.listen(3001, () => {
     setTimeout(() => {

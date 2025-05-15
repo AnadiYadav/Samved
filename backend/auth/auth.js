@@ -79,7 +79,7 @@ app.use(helmet.contentSecurityPolicy({
 
 // ==================== CORS CONFIGURATION ====================
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5500',
+  origin: process.env.FRONTEND_URL || 'http://127.0.0.1:5500',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With','X-Query-Source']
@@ -162,6 +162,7 @@ const requireRole = (requiredRole) => {
           message: 'Insufficient privileges'
         });
       }
+
 
       next();
     } catch (error) {
@@ -480,6 +481,33 @@ app.get('/api/my-approval-stats', authenticateToken, async (req, res) => {
       message: 'Failed to fetch approval statistics' 
     });
   }
+});
+
+// ==================== SUPERADMIN APPROVAL STATS ====================
+app.get('/api/superadmin/approval-stats', 
+  authenticateToken,
+  requireRole('superadmin'),
+  async (req, res) => {
+    try {
+        const [results] = await pool.execute(
+            `SELECT 
+                SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
+                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+             FROM knowledge_requests`
+        );
+
+        res.json({
+            success: true,
+            data: results[0]
+        });
+    } catch (error) {
+        console.error('Superadmin stats error:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Failed to fetch approval statistics' 
+        });
+    }
 });
 
 // ==================== PENDING REQUESTS ENDPOINT ====================
@@ -895,38 +923,58 @@ app.post('/api/create-admin',
   }
 );
 
-// Sentiment Analysis Chart Endpoint 
-app.get('/api/sentiment-data', 
+// ==================== SENTIMENT ANALYSIS ENDPOINT (ADMIN + SUPERADMIN) ====================
+// ==================== ADMIN SENTIMENT ENDPOINT ==================== 
+app.get('/api/admin/sentiment', 
+  authenticateToken,
+  requireRole('admin'),
+  async (req, res) => {
+    try {
+        const response = await fetch('http://0.0.0.0:7860/sentiment');
+        const { nqueries } = await response.json();
+        
+        // Get last 5 sentiment scores (most recent first)
+        const latestScores = nqueries.sentiment.slice(-5).reverse();
+        
+        res.json({
+            success: true,
+            data: {
+                labels: latestScores.map((_, i) => `Score ${i + 1}`),
+                scores: latestScores
+            }
+        });
+
+    } catch (error) {
+        console.error('Sentiment error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to process sentiment data'
+        });
+    }
+});
+
+// ==================== SUPERADMIN SENTIMENT ENDPOINT ====================
+app.get('/api/superadmin/sentiment', 
   authenticateToken,
   requireRole('superadmin'),
   async (req, res) => {
     try {
-      const [results] = await pool.execute(
-        `SELECT 
-          SUM(CASE WHEN sentiment = 'positive' THEN 1 ELSE 0 END) as positive,
-          SUM(CASE WHEN sentiment = 'neutral' THEN 1 ELSE 0 END) as neutral,
-          SUM(CASE WHEN sentiment = 'negative' THEN 1 ELSE 0 END) as negative
-         FROM chat_logs
-         WHERE timestamp > DATE_SUB(NOW(), INTERVAL 7 DAY)`
-      );
+        const response = await fetch('http://0.0.0.0:7860/sentiment');
+        const { nqueries } = await response.json();
+        const latestScores = nqueries.sentiment.slice(-5).reverse();
+        
+        res.json({
+            success: true,
+            data: {
+                labels: latestScores.map((_, i) => `Score ${i + 1}`),
+                scores: latestScores
+            }
+        });
 
-      res.json({
-        success: true,
-        data: {
-          positive: results[0].positive || 0,
-          neutral: results[0].neutral || 0,
-          negative: results[0].negative || 0
-        }
-      });
     } catch (error) {
-      console.error('NRSC Sentiment analysis error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch sentiment data'
-      });
+        res.status(500).json({ success: false, message: 'Failed to process data' });
     }
-  }
-);
+});
 
 // ==================== TOTAL ADMINS ENDPOINT ====================
 
