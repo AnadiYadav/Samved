@@ -13,7 +13,8 @@ const path = require('path');
 const fs = require('fs');
 const ora = require('ora');
 const chalk = require('chalk');
-
+const FormData = require('form-data');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const app = express();
 
@@ -176,6 +177,42 @@ const requireRole = (requiredRole) => {
 };
 
 
+// ==================== CHAT SESSION TRACKING ENDPOINT ====================
+app.post('/api/session-start', async (req, res) => {
+  try {
+    const { session_id, timestamp } = req.body;
+    
+    if (!session_id || !timestamp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: session_id and timestamp'
+      });
+    }
+
+    // Insert new session into database
+    await pool.execute(
+      `INSERT INTO chat_sessions 
+       (session_id, start_time, interaction_count)
+       VALUES (?, ?, 1)
+       ON DUPLICATE KEY UPDATE
+       interaction_count = interaction_count + 1`,
+      [session_id, new Date(timestamp)]
+    );
+
+    res.json({
+      success: true,
+      message: 'Session tracking initialized'
+    });
+
+  } catch (error) {
+    console.error('Session tracking error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to initialize session tracking'
+    });
+  }
+});
+
 // ==================== LOGIN ENDPOINT ====================
 app.post('/api/login', [
   body('email').isEmail().normalizeEmail(),
@@ -299,7 +336,7 @@ app.get('/api/superadmin/total-queries',
         }
 
         const analyticsData = await analyticsResponse.json();
-        console.log(analyticsData);
+        // console.log(analyticsData);
         if (!Array.isArray(analyticsData.nqueries)) {
             return res.status(502).json({
                 success: false,
@@ -764,7 +801,7 @@ app.get('/api/knowledge-requests/pending',
 
 
 
-// Approve/Reject knowledge request
+// ==================== APPROVE/REJECT KNOWLEDGE REQUEST ====================
 app.post('/api/knowledge-requests/:id/:action', 
   authenticateToken,
   requireRole('superadmin'),
@@ -796,6 +833,65 @@ app.post('/api/knowledge-requests/:id/:action',
         `SELECT * FROM knowledge_requests WHERE id = ?`,
         [id]
       );
+
+      //  PROCESS APPROVED CONTENT ====================
+      if (action === 'approve' && request[0]) {
+        const requestData = request[0];
+        
+        if (requestData.type === 'link') {
+          // Process link in background
+          (async () => {
+            try {
+              console.log(`\n=== STARTING LINK PROCESSING FOR REQUEST ${id} ===`);
+              console.log(`🌐 URL: ${requestData.content}`);
+              
+              const response = await fetch('http://localhost:3001/proxy/initiate-processing', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ url: requestData.content }),
+                timeout: 3600000 // 1 hour timeout
+              });
+
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+              const { jobId } = await response.json();
+              
+              console.log(`🔄 Background processing started with Job ID: ${jobId}`);
+              console.log(`📁 Temp files will be stored in backend/temp folder`);
+
+            } catch (error) {
+              console.error(`❌ Link processing failed for request ${id}:`, error.message);
+            }
+          })();
+
+        } else if (requestData.type === 'pdf' && requestData.file_path) {
+          // Process PDF in background
+          (async () => {
+            try {
+              console.log(`\n=== STARTING PDF PROCESSING FOR REQUEST ${id} ===`);
+              console.log(`📄 File Path: ${requestData.file_path}`);
+
+              const form = new FormData();
+              form.append('file', fs.createReadStream(requestData.file_path), {
+                filename: path.basename(requestData.file_path)
+              });
+
+              const response = await fetch('http://localhost:3001/proxy/scrape-pdf-file', {
+                method: 'POST',
+                body: form,
+                headers: form.getHeaders(),
+                timeout: 3600000 // 1 hour timeout
+              });
+
+              const result = await response.json();
+              console.log(`✅ PDF processing completed: ${result.message}`);
+              console.log(`📊 Processed ${result.pages} pages from PDF`);
+
+            } catch (error) {
+              console.error(`❌ PDF processing failed for request ${id}:`, error.message);
+            }
+          })();
+        }
+      }
 
       res.json({
         success: true,
@@ -923,6 +1019,128 @@ app.post('/api/create-admin',
   }
 );
 
+
+// ==================== VISITOR ANALYTICS ENDPOINT ====================
+//For Admin
+
+
+app.get('/api/visitor-stats', 
+  authenticateToken,
+  requireRole('admin'),
+  async (req, res) => {
+    try {
+      const [results] = await pool.execute(
+        `SELECT 
+          DATE(start_time) AS date,
+          COUNT(*) AS visitors
+         FROM chat_sessions
+         WHERE start_time >= CURDATE() - INTERVAL 30 DAY
+         GROUP BY DATE(start_time)
+         ORDER BY date ASC`
+      );
+
+      // Fill in missing dates with 0 visitors
+      const dateMap = new Map();
+      const currentDate = new Date();
+      
+      // Initialize 30-day map
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date(currentDate);
+        date.setDate(date.getDate() - i);
+        const dateString = date.toISOString().split('T')[0];
+        dateMap.set(dateString, 0);
+      }
+
+      // Update with actual data
+      results.forEach(row => {
+        dateMap.set(row.date.toISOString().split('T')[0], row.visitors);
+      });
+
+      const chartData = {
+        labels: Array.from(dateMap.keys()).map(date => 
+          new Date(date).toLocaleDateString('en-IN', {day: '2-digit', month: 'short'})
+        ),
+        data: Array.from(dateMap.values())
+      };
+
+      res.json({
+        success: true,
+        data: chartData
+      });
+
+    } catch (error) {
+      console.error('Visitor stats error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch visitor analytics'
+      });
+    }
+  }
+);
+
+
+//====For Superadmin
+
+app.get('/api/superadmin/visitor-stats', 
+  authenticateToken,
+  requireRole('superadmin'),
+  async (req, res) => {
+    try {
+      const [results] = await pool.execute(
+        `SELECT 
+          DATE(start_time) AS date,
+          COUNT(*) AS visitors,
+          SUM(interaction_count) AS interactions
+         FROM chat_sessions
+         WHERE start_time >= CURDATE() - INTERVAL 30 DAY
+         GROUP BY DATE(start_time)
+         ORDER BY date ASC`
+      );
+
+      // Fill missing dates
+      const dateMap = new Map();
+      const currentDate = new Date();
+      
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date(currentDate);
+        date.setDate(date.getDate() - i);
+        const dateString = date.toISOString().split('T')[0];
+        dateMap.set(dateString, { visitors: 0, interactions: 0 });
+      }
+
+      results.forEach(row => {
+        const dateKey = row.date.toISOString().split('T')[0];
+        dateMap.set(dateKey, {
+          visitors: row.visitors,
+          interactions: row.interactions
+        });
+      });
+
+      const chartData = {
+        labels: Array.from(dateMap.keys()).map(date => 
+          new Date(date).toLocaleDateString('en-IN', {day: '2-digit', month: 'short'})
+        ),
+        datasets: {
+          visitors: Array.from(dateMap.values()).map(d => d.visitors),
+          interactions: Array.from(dateMap.values()).map(d => d.interactions)
+        }
+      };
+
+      res.json({
+        success: true,
+        data: chartData
+      });
+
+    } catch (error) {
+      console.error('Superadmin visitor error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch visitor analytics'
+      });
+    }
+  }
+);
+
 // ==================== SENTIMENT ANALYSIS ENDPOINT (ADMIN + SUPERADMIN) ====================
 // ==================== ADMIN SENTIMENT ENDPOINT ==================== 
 app.get('/api/admin/sentiment', 
@@ -932,7 +1150,6 @@ app.get('/api/admin/sentiment',
     try {
         const response = await fetch('http://0.0.0.0:7860/sentiment');
         const { nqueries } = await response.json();
-        
         // Get last 5 sentiment scores (most recent first)
         const latestScores = nqueries.sentiment.slice(-5).reverse();
         
@@ -1071,6 +1288,48 @@ app.get('/api/my-request-history', authenticateToken, async (req, res) => {
   }
 });
 
+// File: backend\auth\auth.js
+
+// ==================== SUPERADMIN REQUEST HISTORY ENDPOINT ====================
+app.get('/api/superadmin/request-history', 
+  authenticateToken,
+  requireRole('superadmin'),
+  async (req, res) => {
+    try {
+      const [requests] = await pool.execute(
+        `SELECT 
+          kr.id,
+          kr.title,
+          kr.type,
+          kr.status,
+          kr.content,
+          kr.description,
+          kr.created_at,
+          kr.decision_at,
+          u1.email AS admin_email,
+          u2.email AS decision_by
+         FROM knowledge_requests kr
+         JOIN users u1 ON kr.admin_id = u1.id
+         LEFT JOIN users u2 ON kr.decision_by = u2.id
+         ORDER BY kr.created_at DESC`
+      );
+
+      res.json({
+        success: true,
+        requests: requests.map(r => ({
+          ...r,
+          file_name: r.type === 'pdf' ? r.content.replace('PDF:', '') : null
+        }))
+      });
+    } catch (error) {
+      console.error('Superadmin history error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch request history'
+      });
+    }
+  }
+);
 
 // =======================   Processing-History Endpoints
 
@@ -1163,7 +1422,73 @@ app.delete('/api/jobs/:id', authenticateToken, async (req, res) => {
 });
 
 
+// ==================== DEBUG ENDPOINTS (TEMPORARY) ====================
+app.get('/api/debug/pdf/:filename',
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const filename = decodeURIComponent(req.params.filename);
+      const filePath = path.join(uploadDir, filename);
+      
+      console.log('[DEBUG] PDF Request:', {
+        user: req.user.id,
+        requestedFile: filename,
+        path: filePath
+      });
 
+      if (!fs.existsSync(filePath)) {
+        console.error('[DEBUG] Missing PDF:', filePath);
+        return res.status(404).json({
+          success: false,
+          message: 'Debug: PDF not found in uploads directory'
+        });
+      }
+
+      // Temporary permission bypass for testing
+      res.sendFile(filePath, {
+        headers: {
+          'Content-Disposition': `inline; filename="${filename}"`
+        }
+      });
+
+    } catch (error) {
+      console.error('[DEBUG] PDF Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Debug: PDF retrieval failed'
+      });
+    }
+  }
+);
+
+app.get('/api/debug/pdf-requests',
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const [requests] = await pool.execute(
+        `SELECT kr.id, kr.admin_id, kr.content, kr.status, u.email 
+         FROM knowledge_requests kr
+         JOIN users u ON kr.admin_id = u.id
+         WHERE kr.type = 'pdf'`
+      );
+
+      res.json({
+        success: true,
+        requests: requests.map(r => ({
+          ...r,
+          filename: r.content.replace('PDF:', '')
+        }))
+      });
+      
+    } catch (error) {
+      console.error('[DEBUG] Request Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Debug: Failed to fetch PDF requests'
+      });
+    }
+  }
+);
 
 
 // ==================== SERVER INITIALIZATION ====================

@@ -139,11 +139,12 @@ app.post('/proxy/initiate-processing', async (req, res) => {
     try {
         const { url } = req.body;
         const jobId = `job-${Date.now()}`;
-        const tempFilePath = path.join(__dirname, 'temp', `${jobId}.json`);
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const tempFilePath = path.join(__dirname, 'temp', `${jobId}-${timestamp}.json`);
 
         // Create temp directory if not exists
         if (!fs.existsSync(path.join(__dirname, 'temp'))) {
-            fs.mkdirSync(path.join(__dirname, 'temp'));
+            fs.mkdirSync(path.join(__dirname, 'temp'), { recursive: true });
         }
 
         // Step 1: Get links
@@ -164,18 +165,23 @@ app.post('/proxy/initiate-processing', async (req, res) => {
             pdf: pdf_links,
             html: all_links,
             processed: 0,
-            total: pdf_links.length + all_links.length
-        }));
+            total: pdf_links.length + all_links.length,
+            start_time: new Date().toISOString(),
+            status: 'processing'
+        }, null, 2));
 
         // Start background processing
         processLinks(jobId, tempFilePath);
 
-        res.json({ jobId });
+        res.json({ 
+            jobId,
+            tempFilePath,
+            totalLinks: pdf_links.length + all_links.length
+        });
         
         console.log(`\n=== NEW PROCESSING JOB ${jobId} ===`);
         console.log(`🌐 Source URL: ${url}`);
         console.log(`📁 Temp file: ${tempFilePath}`);
-        console.log(`📊 Total links: ${pdf_links.length + all_links.length}`);
 
     } catch (error) {
         console.error('Initiation Error:', error);
@@ -183,7 +189,8 @@ app.post('/proxy/initiate-processing', async (req, res) => {
     }
 });
 
-// Background processing function
+// Background processing function 
+// Background processing function - UPDATED WITH FETCH
 async function processLinks(jobId, filePath) {
     try {
         const jobData = JSON.parse(fs.readFileSync(filePath));
@@ -191,17 +198,34 @@ async function processLinks(jobId, filePath) {
 
         const processLink = async (url, type) => {
             try {
-                const endpoint = type === 'pdf' ? 'scrape-pdf' : 'scrape-page';
-                await fetch(`http://0.0.0.0:7860/${endpoint}`, {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3600000);
+
+                // Match test2.js/test3.js parameters
+                const bodyData = JSON.stringify({
+                    url,
+                    ...(type === 'html' ? { 'scrape-images': false } : { 'scrape-image': false })
+                });
+
+                const response = await fetch(`http://0.0.0.0:7860/${type === 'pdf' ? 'scrape-pdf' : 'scrape-page'}`, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ url }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Content-Length': Buffer.byteLength(bodyData)
+                    },
+                    body: bodyData,
+                    signal: controller.signal,
                     dispatcher: new Undici.Agent({
                         headersTimeout: 3600000,
                         bodyTimeout: 3600000
                     })
                 });
+
+                clearTimeout(timeoutId);
                 
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                await response.json();
+
                 processedCount++;
                 console.log(`✅ [${jobId}] Processed ${type.toUpperCase()} ${processedCount}/${jobData.total}: ${url}`);
                 
@@ -213,6 +237,7 @@ async function processLinks(jobId, filePath) {
 
             } catch (error) {
                 console.error(`❌ [${jobId}] Failed ${type.toUpperCase()} ${processedCount + 1}/${jobData.total}: ${url}\nREASON: ${error.message}`);
+                throw error;
             }
         };
 
@@ -226,17 +251,17 @@ async function processLinks(jobId, filePath) {
             await processLink(url, 'pdf');
         }
 
-        // Cleanup
-        fs.unlinkSync(filePath);
         console.log(`\n=== JOB COMPLETE ${jobId} ===`);
         console.log(`✅ Successfully processed ${processedCount}/${jobData.total} links`);
-        console.log(`🗑️  Deleted temp file: ${filePath}`);
+        console.log(`📁 Temp file preserved at: ${filePath}`);
 
     } catch (error) {
         console.error(`\n‼️ JOB FAILED ${jobId}: ${error.message}`);
-        fs.unlinkSync(filePath);
+        // Temp file remains for debugging
     }
 }
+
+
 
 app.listen(3001, () => {
     setTimeout(() => {

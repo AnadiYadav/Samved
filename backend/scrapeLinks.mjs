@@ -1,11 +1,14 @@
+import { response } from 'express';
 import fetch from 'node-fetch';
 
 // 🔗 Links to send
 // 'https://www.inspace.gov.in/inspace?id=inspace_about_inspace',
 // 'https://www.inspace.gov.in/inspace?id=inspace_nge_proposal_page',
+// 'https://www.nrsc.gov.in/sites/default/files/pdf/Careers/application_form_for_NRSC_RMT-3-2023.pdf',
+// 'https://www.nrsc.gov.in/sites/default/files/pdf/Announcements/Caution%20for%20Job%20Seekers-%20Fake%20Recruitment%20Notices%20&%20Appointment%20Offers.pdf'
 const links = [
     'https://www.nrsc.gov.in/sites/default/files/pdf/Careers/application_form_for_NRSC_RMT-3-2023.pdf',
-    'https://www.nrsc.gov.in/sites/default/files/pdf/Announcements/Caution%20for%20Job%20Seekers-%20Fake%20Recruitment%20Notices%20&%20Appointment%20Offers.pdf'
+'https://www.nrsc.gov.in/sites/default/files/pdf/Announcements/Caution%20for%20Job%20Seekers-%20Fake%20Recruitment%20Notices%20&%20Appointment%20Offers.pdf'
 ];
 
 // 🔗 Base API endpoint
@@ -18,14 +21,23 @@ async function sendLinks() {
         const link = links[i];
 
         try {
-            const response = await fetch('http://0.0.0.0:7860/scrape-pdf', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  url: link,
-                  'scrape-image': false
-                })
-              });
+            const response = await fetch('https://8888-01jvz3v9phphmvq0twsmakz8zy.cloudspaces.litng.ai', {
+                method: 'GET',
+                // headers: { 'Content-Type': 'application/json' },
+                // body: JSON.stringify({
+                //   url: "https://voicexp.ai/"
+                // })
+            });
+            console.log(response);
+              
+            // const response = await fetch('http://0.0.0.0:7860/scrape-pdf', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({
+            //       url: link,
+            //       'scrape-images': false
+            //     })
+            //   });
               
 
             if (!response.ok) {

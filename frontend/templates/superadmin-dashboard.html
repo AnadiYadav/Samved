@@ -98,26 +98,31 @@
             </div>
 
         <!-- Request History Modal Section-->
-            <div id="historyModal" class="modal">
+        <div id="requestHistoryModal" class="nrsc-modal">
             <div class="modal-content">
-                <span class="close" onclick="closeHistoryModal()">&times;</span>
-                    <h2>Request Decision History</h2>
-                    <div class="requests-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Admin</th>
-                                    <th>Request Title</th>
-                                    <th>Type</th>
-                                    <th>Decision</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody id="historyBody"></tbody>
-                        </table>
-                    </div>
+                <div class="modal-header">
+                    <h2>📋 All Requests History</h2>
+                    <span class="close-modal" onclick="closeRequestHistory()">&times;</span>
+                </div>
+                
+                <div class="modal-body scroll-container">
+                    <table class="nrsc-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Admin</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="superadminHistoryBody">
+                            <!-- Dynamically populated -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
 
         </section>
     </main>
@@ -349,7 +354,7 @@
         border: 1px solid #dee2e6;
         border-radius: 4px;
     }
-    <style>
+    
         .processing-history {
             margin-top: 2rem;
             padding: 1.5rem;

@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // Initialize dashboard components
+        loadDebugPDFList();
         initializeCharts();
         loadActiveSessions();
         loadPendingRequests();
@@ -74,24 +75,63 @@ async function initializeCharts() {
 
     // Visitor Statistics Chart
     const visitorCtx = document.getElementById('visitorChart').getContext('2d');
-    new Chart(visitorCtx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Monthly Visitors',
-                data: [65, 59, 80, 81, 56, 55],
-                borderColor: '#0066b2',
-                tension: 0.4,
-                fill: false
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { position: 'top' } }
-        }
-    });
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/visitor-stats`, {
+            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const { data } = await response.json();
+
+        new Chart(visitorCtx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Daily Visitors',
+                    data: data.data,
+                    borderColor: '#0066b2',
+                    tension: 0.4,
+                    fill: false,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#0066b2'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            title: (context) => `Date: ${context[0].label}`,
+                            label: (context) => `Visitors: ${context.raw}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Visitors' }
+                    }
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Visitor chart error:', error);
+        // Fallback to empty chart
+        new Chart(visitorCtx, {
+            type: 'line',
+            data: { labels: [], datasets: [] },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
 
     // ==================== SENTIMENT CHART INITIALIZATION ====================
     initializeSentimentChart();
@@ -444,3 +484,87 @@ function handleLogout() {
     });
 }
 //working
+
+// ==================== DEBUG PDF LIST ====================
+async function loadDebugPDFList() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/debug/pdf-requests`, {
+            credentials: 'include'
+        });
+        const { requests } = await response.json();
+        
+        const tbody = document.getElementById('pdfDebugBody');
+        tbody.innerHTML = requests.map(req => `
+            <tr>
+                <td>${req.email}</td>
+                <td>
+                    <span class="pdf-link" 
+                          onclick="handlePDFPreview('${req.filename}')">
+                        ${req.filename}
+                    </span>
+                </td>
+                <td>${req.status.toUpperCase()}</td>
+                <td>
+                    <button onclick="sendToPythonBackend('${req.filename}')">
+                        Process PDF
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error('Debug PDF load error:', error);
+    }
+}
+
+// ==================== UPDATED PDF PREVIEW HANDLER ====================
+async function handlePDFPreview(filename) {
+    try {
+        const url = `${API_BASE_URL}/debug/pdf/${encodeURIComponent(filename)}`;
+        console.log('[DEBUG] Fetching PDF from:', url);
+        
+        const response = await fetch(url, {
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+        }
+        
+        const blob = await response.blob();
+        const pdfUrl = window.URL.createObjectURL(blob);
+        window.open(pdfUrl, '_blank');
+        
+    } catch (error) {
+        console.error('[DEBUG] PDF Error:', error);
+        alert('DEBUG: Failed to preview PDF. Check console for details.');
+    }
+}
+
+// ==================== PYTHON BACKEND INTEGRATION ====================
+async function sendToPythonBackend(filename) {
+    try {
+        // Get PDF data from Node.js backend
+        const pdfResponse = await fetch(`${API_BASE_URL}/knowledge-files/${encodeURIComponent(filename)}`, {
+            credentials: 'include'
+        });
+        
+        if (!pdfResponse.ok) throw new Error('Failed to fetch PDF');
+        
+        const blob = await pdfResponse.blob();
+        const formData = new FormData();
+        formData.append('pdf', blob, filename);
+
+        // Send to Python backend
+        const pythonResponse = await fetch('http://localhost:7860/scrape-pdf-file', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await pythonResponse.json();
+        alert(`Python backend response: ${result.message}`);
+        
+    } catch (error) {
+        console.error('Python integration error:', error);
+        alert('NRSC: Failed to process PDF');
+    }
+}

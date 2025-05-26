@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Chart Initialization 
-function initializeCharts() {
+async function initializeCharts() {
     // Frequently Asked Questions Chart
     const faqCtx = document.getElementById('faqChart').getContext('2d');
     new Chart(faqCtx, {
@@ -247,26 +247,71 @@ function initializeFallbackChart() {
 
     // Visitor Statistics Chart 
     const visitorCtx = document.getElementById('visitorChart').getContext('2d');
-    new Chart(visitorCtx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Monthly Visitors',
-                data: [65, 59, 80, 81, 56, 55],
-                borderColor: '#0066b2',
-                tension: 0.4,
-                fill: false
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top' }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/superadmin/visitor-stats`, {
+            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
             }
-        }
-    });
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const { data } = await response.json();
+
+        new Chart(visitorCtx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Daily Visitors',
+                    data: data.datasets.visitors,
+                    borderColor: '#0066b2',
+                    tension: 0.4,
+                    fill: false,
+                    pointRadius: 4
+                },
+                {
+                    label: 'Total Interactions',
+                    data: data.datasets.interactions,
+                    borderColor: '#FF671F',
+                    tension: 0.4,
+                    fill: false,
+                    pointRadius: 4,
+                    borderDash: [5, 5]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            title: (context) => `Date: ${context[0].label}`,
+                            label: (context) => 
+                                `${context.dataset.label}: ${context.raw}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Count' }
+                    }
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Visitor chart error:', error);
+        // Fallback to empty chart
+        new Chart(visitorCtx, {
+            type: 'line',
+            data: { labels: [], datasets: [] },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
 }
 
 
@@ -450,34 +495,104 @@ async function loadTotalAdmins() {
     }
 }
 
-// Request History Functions
+
+// Replace existing request history functions with:
+
+let currentExpandedId = null;
+
+// Show Request History Modal
 function showRequestHistory() {
-    document.getElementById('historyModal').style.display = 'block';
-    loadRequestHistory();
+    document.getElementById('requestHistoryModal').style.display = 'block';
+    loadSuperadminRequestHistory();
 }
 
-function closeHistoryModal() {
-    document.getElementById('historyModal').style.display = 'none';
+// Close Modal
+function closeRequestHistory() {
+    document.getElementById('requestHistoryModal').style.display = 'none';
+    currentExpandedId = null;
 }
 
-async function loadRequestHistory() {
+// Load Superadmin Request History
+async function loadSuperadminRequestHistory() {
     try {
-        const response = await fetch(`${API_BASE_URL}/request-history`, {
-            credentials: 'include'
+        const response = await fetch(`${API_BASE_URL}/superadmin/request-history`, {
+            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
         });
+        
         const { requests } = await response.json();
-        const tbody = document.getElementById('historyBody');
-        tbody.innerHTML = requests.map(request => `
-            <tr>
-            <td>${request.admin_email}</td>
-            <td>${request.title}</td>
-            <td>${request.type.toUpperCase()}</td>
-            <td><span class="decision-${request.status}">${request.decision}</span></td>
-            <td>${new Date(request.decision_at).toLocaleDateString('en-IN')}</td>
-            </tr>
-            `).join('');
+        populateSuperadminHistoryTable(requests);
+        
     } catch (error) {
         console.error('Request history error:', error);
+        alert('Failed to load request history');
+    }
+}
+
+// Populate History Table
+function populateSuperadminHistoryTable(requests) {
+    const tbody = document.getElementById('superadminHistoryBody');
+    tbody.innerHTML = requests.map(request => `
+        <tr class="expandable-row" onclick="toggleRequestDetails('${request.id}', this)">
+            <td class="clickable-title">${request.title}</td>
+            <td>${request.admin_email}</td>
+            <td>${request.type.toUpperCase()}</td>
+            <td><span class="status-tag ${request.status}">${request.status.toUpperCase()}</span></td>
+            <td>${new Date(request.created_at).toLocaleDateString('en-IN')}</td>
+        </tr>
+        <tr class="details-row" id="details-${request.id}">
+            <td colspan="5">
+                <div class="detail-content-grid">
+                    <div class="detail-section">
+                        <p><strong>Submitted By:</strong> ${request.admin_email}</p>
+                        <p><strong>Submitted At:</strong> ${new Date(request.created_at).toLocaleString('en-IN')}</p>
+                        <p><strong>Decision By:</strong> ${request.decision_by || 'Pending'}</p>
+                        <p><strong>Decision At:</strong> ${request.decision_at ? new Date(request.decision_at).toLocaleString('en-IN') : 'N/A'}</p>
+                    </div>
+                    <div class="content-section">
+                        ${request.type === 'pdf' ? 
+                            `<div class="pdf-filename">
+                                <strong>Document:</strong> 
+                                <span>${request.content.replace('PDF:', '')}</span>
+                            </div>` : 
+                            `<p><strong>Content:</strong><br>${request.content}</p>`
+                        }
+                        ${request.description ? 
+                            `<div class="description-box">
+                                <strong>Description:</strong>
+                                <p>${request.description}</p>
+                            </div>` : 
+                            ''
+                        }
+                    </div>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Toggle Request Details
+function toggleRequestDetails(requestId, element) {
+    const detailsRow = document.getElementById(`details-${requestId}`);
+    const titleRow = element.closest('tr');
+
+    // Collapse previous expanded row
+    if (currentExpandedId && currentExpandedId !== requestId) {
+        const prevDetails = document.getElementById(`details-${currentExpandedId}`);
+        prevDetails.classList.remove('expanded');
+        prevDetails.previousElementSibling.style.background = 'white';
+    }
+
+    // Toggle current row
+    detailsRow.classList.toggle('expanded');
+    titleRow.style.background = detailsRow.classList.contains('expanded') ? '#f1f8ff' : 'white';
+    currentExpandedId = detailsRow.classList.contains('expanded') ? requestId : null;
+
+    // Scroll to view if expanding
+    if (detailsRow.classList.contains('expanded')) {
+        detailsRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
 
@@ -573,6 +688,7 @@ document.getElementById('informationForm').addEventListener('submit', async (e) 
 
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
+            formData.append('scrape-images', 'false');
 
             const response = await fetch(`${PROXY_URL}/scrape-pdf-file`, {
                 method: 'POST',

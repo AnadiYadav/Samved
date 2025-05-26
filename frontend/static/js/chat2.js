@@ -5,7 +5,7 @@
 
 // API Configuration
 const API_BASE_URL = 'https://8888-01js1h540pyys2dz7kcae1fbk9.cloudspaces.litng.ai';
-let sessionId = generateSessionId();
+let sessionId = null;
 // localStorage.setItem('sessionId', sessionId);
 
 // Chat elements
@@ -54,6 +54,23 @@ async function sendMessage() {
     const input = document.getElementById('userInput');
     const message = input.value.trim();
     if (!message) return;
+
+
+    if (!sessionId) {
+        sessionId = generateSessionId();
+        try {
+            await fetch(`http://localhost:3000/api/session-start`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    timestamp: new Date().toISOString()
+                })
+            });
+        } catch (error) {
+            console.log('Session tracking error:', error);
+        }
+    }
 
     const chatBody = document.getElementById('chatBody');
     
