@@ -329,6 +329,8 @@ async function loadActiveSessions() {
 }
 
 // Load Pending Requests 
+let currentExpandedRequest = null;
+
 async function loadPendingRequests() {
     try {
         const response = await fetch(`${API_BASE_URL}/knowledge-requests/pending`, {
@@ -349,30 +351,90 @@ async function loadPendingRequests() {
         // Populate requests table
         const tbody = document.getElementById('requestsBody');
         tbody.innerHTML = requests.map(request => `
-        <tr>
+            <tr class="main-row" data-id="${request.id}">
                 <td>${request.admin_email}</td>
-                <td class="request-title">${request.type.toUpperCase()} - ${request.title}</td>
+                <td class="request-title" data-id="${request.id}">${request.type.toUpperCase()} - ${request.title}</td>
                 <td>${new Date(request.created_at).toLocaleDateString('en-IN')}</td>
                 <td class="action-buttons">
                     <button class="btn-approve" data-id="${request.id}">Approve</button>
                     <button class="btn-reject" data-id="${request.id}">Reject</button>
                 </td>
-        </tr>
+            </tr>
+            <tr class="details-row" id="details-${request.id}" style="display:none">
+                <td colspan="4">
+                    <div class="detail-content-grid">
+                        <div class="detail-section">
+                            <p><strong>Submitted By:</strong> ${request.admin_email}</p>
+                            <p><strong>Submitted At:</strong> ${new Date(request.created_at).toLocaleString('en-IN')}</p>
+                            ${request.type === 'pdf' ? 
+                                `<p><strong>Document:</strong> 
+                                    <a href="${API_BASE_URL}/knowledge-files/${encodeURIComponent(request.content.replace('PDF:', ''))}" 
+                                       target="_blank" 
+                                       class="pdf-link">
+                                        ${request.content.replace('PDF:', '')}
+                                    </a>
+                                </p>` : 
+                                `<p><strong>Content:</strong><br>${request.content}</p>`
+                            }
+                        </div>
+                        <div class="detail-section">
+                            <p><strong>Description:</strong></p>
+                            ${request.description ? 
+                                `<div class="description-box">
+                                    <p>${request.description}</p>
+                                </div>` : 
+                                '<p>No description provided</p>'
+                            }
+                        </div>
+                    </div>
+                </td>
+            </tr>
         `).join('');
 
+        // Add event listeners to title cells
+        document.querySelectorAll('#pendingRequestsTable .request-title').forEach(titleCell => {
+            titleCell.addEventListener('click', (e) => {
+                const requestId = e.target.dataset.id;
+                const detailsRow = document.getElementById(`details-${requestId}`);
+                
+                // Collapse previous expanded row
+                if (currentExpandedRequest && currentExpandedRequest !== requestId) {
+                    const prevDetails = document.getElementById(`details-${currentExpandedRequest}`);
+                    if (prevDetails) prevDetails.style.display = 'none';
+                }
+                
+                // Toggle current row
+                detailsRow.style.display = detailsRow.style.display === 'none' ? 'table-row' : 'none';
+                currentExpandedRequest = detailsRow.style.display === 'table-row' ? requestId : null;
+                
+                // Scroll to view if expanding
+                if (detailsRow.style.display === 'table-row') {
+                    detailsRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        });
+
         // Add event listeners to action buttons
-        document.querySelectorAll('.btn-approve').forEach(btn => {
-            btn.addEventListener('click', () => handleRequestAction(btn.dataset.id, 'approve'));
+        document.querySelectorAll('#pendingRequestsTable .btn-approve').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleRequestAction(btn.dataset.id, 'approve');
+            });
         });
         
-        document.querySelectorAll('.btn-reject').forEach(btn => {
-            btn.addEventListener('click', () => handleRequestAction(btn.dataset.id, 'reject'));
+        document.querySelectorAll('#pendingRequestsTable .btn-reject').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleRequestAction(btn.dataset.id, 'reject');
+            });
         });
 
     } catch (error) {
         console.error('NRSC Request Error:', error);
     }
 }
+
+
 
 // Update approval chart data
 function updateApprovalChart(pendingCount) {
@@ -531,7 +593,7 @@ async function loadSuperadminRequestHistory() {
     }
 }
 
-// Populate History Table
+// Populate History Table 
 function populateSuperadminHistoryTable(requests) {
     const tbody = document.getElementById('superadminHistoryBody');
     tbody.innerHTML = requests.map(request => `
@@ -555,7 +617,10 @@ function populateSuperadminHistoryTable(requests) {
                         ${request.type === 'pdf' ? 
                             `<div class="pdf-filename">
                                 <strong>Document:</strong> 
-                                <span>${request.content.replace('PDF:', '')}</span>
+                                <a href="${API_BASE_URL}/knowledge-files/${encodeURIComponent(request.content.replace('PDF:', ''))}" 
+                                   target="_blank">
+                                    ${request.content.replace('PDF:', '')}
+                                </a>
                             </div>` : 
                             `<p><strong>Content:</strong><br>${request.content}</p>`
                         }
@@ -645,8 +710,8 @@ let isProcessing = false;
 
 document.getElementById('informationForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const PROXY_URL = 'http://localhost:3001/proxy';
     const statusElement = document.getElementById('scrapingStatus');
+    const PROXY_URL = 'http://localhost:3001/proxy';
 
     try {
         const contentType = document.getElementById('infoType').value;
@@ -686,28 +751,37 @@ document.getElementById('informationForm').addEventListener('submit', async (e) 
                 return;
             }
 
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            formData.append('scrape-images', 'false');
-
+            const file = fileInput.files[0];
+            
+            // Send the file directly as binary data
             const response = await fetch(`${PROXY_URL}/scrape-pdf-file`, {
                 method: 'POST',
-                body: formData
+                body: file,
+                headers: {
+                    'Content-Type': 'application/pdf'
+                }
             });
 
-            if (!response.ok) throw new Error('PDF processing failed');
-            statusElement.querySelector('.toast-content').textContent = 'PDF processed successfully!';
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'PDF processing failed');
+            }
+            
+            const result = await response.json();
+            statusElement.querySelector('.toast-content').textContent = 
+                `PDF processed successfully! ${result.pages} pages indexed`;
         }
 
         setTimeout(() => {
             statusElement.style.display = 'none';
             document.getElementById('informationForm').reset();
-        }, 3000);
+            toggleInfoField();
+        }, 5000);
 
     } catch (error) {
         statusElement.querySelector('.toast-content').textContent = `Error: ${error.message}`;
         statusElement.classList.add('error');
-        setTimeout(() => statusElement.style.display = 'none', 5000);
+        setTimeout(() => statusElement.style.display = 'none', 10000);
     }
 });
 
@@ -733,39 +807,149 @@ function updateProcessingHistory(job) {
     }
 }
 
-// Update showProcessingHistory function in dashboard.js
-function showProcessingHistory() {
-    try {
-        const history = JSON.parse(localStorage.getItem('processingHistory') || '[]');
-        const historyContainer = document.getElementById('jobsList');
-        
-        historyContainer.innerHTML = history.map(job => {
-            const date = new Date(job.timestamp);
-            return `
-            <div class="history-item ${job.status}">
-                <div class="job-meta">
-                    <span class="job-id">#${job.id}</span>
-                    <span class="job-status status-${job.status}">
-                        ${job.status.toUpperCase()}
-                    </span>
-                    <span>${date.toLocaleDateString()} ${date.toLocaleTimeString()}</span>
-                </div>
-                <div class="job-stats">
-                    <span>Total: ${job.total}</span>
-                    <span>Success: ${job.success}</span>
-                    <span>Failed: ${job.failed}</span>
-                </div>
-                <button class="delete-history" onclick="deleteHistoryItem(${job.id})">
-                    &times;
-                </button>
-            </div>
-            `;
-        }).join('');
-
-    } catch (error) {
-        console.error('Error showing history:', error);
+// ==================== PROCESSING HISTORY MANAGEMENT ====================
+// ==================== PROCESSING HISTORY MANAGEMENT ====================
+// ==================== PROCESSING HISTORY MANAGEMENT ====================
+async function showProcessingHistory() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/processing-jobs`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${await response.text()}`);
     }
+    
+    const jobs = await response.json();
+    const historyContainer = document.getElementById('jobsList');
+    historyContainer.innerHTML = '';
+    
+    jobs.forEach(job => {
+      // Safely access properties with defaults
+      const jobId = job.jobId || 'N/A';
+      const status = job.status || 'unknown';
+      const type = job.type ? job.type.toUpperCase() : 'UNKNOWN';
+      const filename = job.filename || '';
+      const sourceUrl = job.sourceUrl || '';
+      const message = job.message || '';
+      const pages = job.pages || 0;
+      const total = job.total || 0;
+      const processed = job.processed || 0;
+      const failedCount = job.failed ? job.failed.length : 0;
+      
+      // Format date as dd/mm/yyyy
+      const timestamp = job.timestamp ? new Date(job.timestamp) : new Date();
+      const formattedDate = timestamp.toLocaleDateString('en-GB');
+      
+      const jobElement = document.createElement('div');
+      jobElement.className = `processing-history-item ${status}`;
+      jobElement.innerHTML = `
+        <div class="processing-job-meta">
+          <span class="processing-job-id">#${jobId}</span>
+          <span class="processing-job-status processing-status-${status}">
+            ${status.toUpperCase()}
+          </span>
+          <span>${formattedDate}</span>
+        </div>
+        <div class="processing-job-details">
+          <p><strong>Type:</strong> ${type}</p>
+          ${filename ? `<p><strong>File:</strong> ${filename}</p>` : ''}
+          ${sourceUrl ? `<p><strong>URL:</strong> ${sourceUrl}</p>` : ''}
+          <p><strong>Status:</strong> ${message}</p>
+          ${pages ? `<p><strong>Pages:</strong> ${pages}</p>` : ''}
+          ${total ? `<p><strong>Total:</strong> ${total}</p>` : ''}
+          ${processed ? `<p><strong>Processed:</strong> ${processed}</p>` : ''}
+          ${failedCount ? `<p><strong>Failed:</strong> ${failedCount}</p>` : ''}
+        </div>
+        <div class="processing-job-actions">
+          <button class="processing-delete-job" data-jobid="${jobId}">×</button>
+          ${status === 'failed' ? 
+            `<button class="processing-retry-job" data-jobid="${jobId}">↻</button>` : 
+            ''
+          }
+        </div>
+      `;
+      historyContainer.appendChild(jobElement);
+    });
+
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.processing-delete-job').forEach(button => {
+      button.addEventListener('click', async (e) => {
+        const jobId = e.target.dataset.jobid;
+        await deleteProcessingJob(jobId);
+        showProcessingHistory();
+      });
+    });
+
+    // Add event listeners for retry buttons
+    document.querySelectorAll('.processing-retry-job').forEach(button => {
+      button.addEventListener('click', async (e) => {
+        const jobId = e.target.dataset.jobid;
+        await retryProcessingJob(jobId);
+        showProcessingHistory();
+      });
+    });
+    
+  } catch (error) {
+    console.error('History load error:', error);
+    alert('Failed to load processing history: ' + error.message);
+  }
 }
+
+async function deleteProcessingJob(jobId) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/processing-jobs/${jobId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        'Authorization': `Bearer ${getAuthToken()}`
+      }
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Delete failed');
+    }
+  } catch (error) {
+    console.error('Delete job error:', error);
+    alert('Failed to delete job');
+  }
+}
+
+async function retryProcessingJob(jobId) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/processing-jobs/${jobId}/retry`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Authorization': `Bearer ${getAuthToken()}`
+      }
+    });
+    
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.message || 'Retry failed');
+    }
+    
+    if (result.jobId) {
+      alert(`Retry job started with ID: ${result.jobId}`);
+      // Refresh processing history after 2 seconds
+      setTimeout(showProcessingHistory, 2000);
+    } else {
+      alert(result.message);
+    }
+  } catch (error) {
+    console.error('Retry job error:', error);
+    alert(`Error: ${error.message}`);
+  }
+}
+
 
 function deleteHistoryItem(jobId) {
     try {

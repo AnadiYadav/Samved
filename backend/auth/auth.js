@@ -40,14 +40,13 @@ const storage = multer.diskStorage({
         cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'nrsc-' + uniqueSuffix + path.extname(file.originalname));
+        cb(null, file.originalname);
     }
 });
 
 const upload = multer({ 
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    limits: { fileSize: 500 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         if (path.extname(file.originalname).toLowerCase() !== '.pdf') {
             return cb(new Error('Only PDF files are allowed'));
@@ -778,6 +777,7 @@ app.get('/api/knowledge-requests/pending',
           kr.type,
           kr.content,
           kr.created_at,
+          kr.description,
           u.email AS admin_email
          FROM knowledge_requests kr
          JOIN users u ON kr.admin_id = u.id
@@ -834,7 +834,7 @@ app.post('/api/knowledge-requests/:id/:action',
         [id]
       );
 
-      //  PROCESS APPROVED CONTENT ====================
+      // PROCESS APPROVED CONTENT ====================
       if (action === 'approve' && request[0]) {
         const requestData = request[0];
         
@@ -870,18 +870,23 @@ app.post('/api/knowledge-requests/:id/:action',
               console.log(`\n=== STARTING PDF PROCESSING FOR REQUEST ${id} ===`);
               console.log(`📄 File Path: ${requestData.file_path}`);
 
-              const form = new FormData();
-              form.append('file', fs.createReadStream(requestData.file_path), {
-                filename: path.basename(requestData.file_path)
-              });
-
+              // Read PDF file
+              const fileBuffer = await fs.promises.readFile(requestData.file_path);
+              
+              // Send to proxy for processing
               const response = await fetch('http://localhost:3001/proxy/scrape-pdf-file', {
                 method: 'POST',
-                body: form,
-                headers: form.getHeaders(),
-                timeout: 3600000 // 1 hour timeout
+                body: fileBuffer,
+                headers: {
+                  'Content-Type': 'application/pdf'
+                }
               });
 
+              if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+              }
+              
               const result = await response.json();
               console.log(`✅ PDF processing completed: ${result.message}`);
               console.log(`📊 Processed ${result.pages} pages from PDF`);
@@ -909,7 +914,8 @@ app.post('/api/knowledge-requests/:id/:action',
   }
 );
 
-// Serve uploaded files
+
+// ==================== KNOWLEDGE FILE DOWNLOAD ENDPOINT ====================
 app.get('/api/knowledge-files/:filename',
   authenticateToken,
   async (req, res) => {
@@ -926,23 +932,29 @@ app.get('/api/knowledge-files/:filename',
 
       // Verify the user has permission to access this file
       const [request] = await pool.execute(
-        `SELECT admin_id FROM knowledge_requests 
-         WHERE content = ? AND type = 'pdf'`,
+        `SELECT kr.admin_id, u.role 
+         FROM knowledge_requests kr
+         JOIN users u ON kr.admin_id = u.id
+         WHERE kr.content = ? AND kr.type = 'pdf'`,
         [`PDF:${filename}`]
       );
 
-      if (request.length === 0 || request[0].admin_id !== req.user.id) {
-        return res.status(403).json({
+      // Allow access for superadmin or the original admin
+      if (request.length > 0 && 
+          (request[0].admin_id === req.user.id || 
+           request[0].role === 'superadmin' || 
+           req.user.role === 'superadmin')) {
+        res.sendFile(filePath, {
+          headers: {
+            'Content-Disposition': `inline; filename="${filename}"`
+          }
+        });
+      } else {
+        res.status(403).json({
           success: false,
           message: 'NRSC security: Unauthorized access'
         });
       }
-
-      res.sendFile(filePath, {
-        headers: {
-          'Content-Disposition': `attachment; filename="${filename}"`
-        }
-      });
     } catch (error) {
       console.error('NRSC File download error:', error);
       res.status(500).json({
@@ -1141,8 +1153,77 @@ app.get('/api/superadmin/visitor-stats',
   }
 );
 
+
+
+
+// ==================== ADMIN FAQ ANALYTICS ENDPOINT ====================
+app.get('/api/admin/category-stats', 
+  authenticateToken,
+  requireRole('admin'),
+  async (req, res) => {
+    try {
+      // Fetch category data from analytics service
+      const response = await fetch('http://0.0.0.0:7860/category');
+      const { nqueries } = await response.json();
+      
+      // Get current date and 30 days ago
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      // Define our target categories
+      const targetCategories = [
+        "Data Products, Services and Policies",
+        "EO Missions",
+        "Applications",
+        "Remote Sensing and GIS",
+        "International Collaboration and Cooperation",
+        "general-questions"
+      ];
+      
+      // Initialize category counters
+      const categoryCounts = {};
+      targetCategories.forEach(cat => {
+        categoryCounts[cat] = 0;
+      });
+      
+      // Process each query
+      for (let i = 0; i < nqueries.time.length; i++) {
+        const queryTime = new Date(nqueries.time[i]);
+        
+        // Filter queries from last 30 days
+        if (queryTime >= thirtyDaysAgo) {
+          const categories = nqueries.category[i];
+          
+          // Count each target category
+          categories.forEach(cat => {
+            if (targetCategories.includes(cat)) {
+              categoryCounts[cat]++;
+            }
+          });
+        }
+      }
+      
+      res.json({
+        success: true,
+        data: {
+          labels: targetCategories,
+          counts: Object.values(categoryCounts)
+        }
+      });
+      
+    } catch (error) {
+      console.error('Category stats error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch category analytics'
+      });
+    }
+  }
+);
+
 // ==================== SENTIMENT ANALYSIS ENDPOINT (ADMIN + SUPERADMIN) ====================
-// ==================== ADMIN SENTIMENT ENDPOINT ==================== 
+// ADMIN SENTIMENT ENDPOINT ==================== 
 app.get('/api/admin/sentiment', 
   authenticateToken,
   requireRole('admin'),
@@ -1214,41 +1295,47 @@ app.get('/api/total-admins', authenticateToken, requireRole('superadmin'), async
   }
 });
 
-// ==================== REQUEST HISTORY ENDPOINT ====================
-app.get('/api/request-history', authenticateToken, requireRole('superadmin'), async (req, res) => {
-  try {
+// ==================== SUPERADMIN REQUEST HISTORY ENDPOINT ====================
+app.get('/api/superadmin/request-history', 
+  authenticateToken,
+  requireRole('superadmin'),
+  async (req, res) => {
+    try {
       const [requests] = await pool.execute(
-          `SELECT 
-              kr.id,
-              kr.title,
-              kr.type,
-              kr.status,
-              kr.created_at,
-              kr.decision_at,
-              u1.email AS admin_email,
-              u2.email AS decided_by
-          FROM knowledge_requests kr
-          JOIN users u1 ON kr.admin_id = u1.id
-          LEFT JOIN users u2 ON kr.decision_by = u2.id
-          WHERE kr.status IN ('approved', 'rejected')
-          ORDER BY kr.decision_at DESC`
+        `SELECT 
+          kr.id,
+          kr.title,
+          kr.type,
+          kr.status,
+          kr.content,
+          kr.description,
+          kr.created_at,
+          kr.decision_at,
+          u1.email AS admin_email,
+          u2.email AS decision_by
+         FROM knowledge_requests kr
+         JOIN users u1 ON kr.admin_id = u1.id
+         LEFT JOIN users u2 ON kr.decision_by = u2.id
+         WHERE kr.status IN ('approved', 'rejected')
+         ORDER BY kr.created_at DESC`
       );
 
       res.json({
-          success: true,
-          requests: requests.map(r => ({
-              ...r,
-              decision: r.status.toUpperCase()
-          }))
+        success: true,
+        requests: requests.map(r => ({
+          ...r,
+          file_name: r.type === 'pdf' ? r.content.replace('PDF:', '') : null
+        }))
       });
-  } catch (error) {
-      console.error('Request history error:', error);
+    } catch (error) {
+      console.error('Superadmin history error:', error);
       res.status(500).json({
-          success: false,
-          message: 'Failed to fetch request history'
+        success: false,
+        message: 'Failed to fetch request history'
       });
+    }
   }
-});
+);
 
 // =============== ADMIN REQUEST HISTORY ENDPOINT ===============
 app.get('/api/my-request-history', authenticateToken, async (req, res) => {
@@ -1290,46 +1377,7 @@ app.get('/api/my-request-history', authenticateToken, async (req, res) => {
 
 // File: backend\auth\auth.js
 
-// ==================== SUPERADMIN REQUEST HISTORY ENDPOINT ====================
-app.get('/api/superadmin/request-history', 
-  authenticateToken,
-  requireRole('superadmin'),
-  async (req, res) => {
-    try {
-      const [requests] = await pool.execute(
-        `SELECT 
-          kr.id,
-          kr.title,
-          kr.type,
-          kr.status,
-          kr.content,
-          kr.description,
-          kr.created_at,
-          kr.decision_at,
-          u1.email AS admin_email,
-          u2.email AS decision_by
-         FROM knowledge_requests kr
-         JOIN users u1 ON kr.admin_id = u1.id
-         LEFT JOIN users u2 ON kr.decision_by = u2.id
-         ORDER BY kr.created_at DESC`
-      );
 
-      res.json({
-        success: true,
-        requests: requests.map(r => ({
-          ...r,
-          file_name: r.type === 'pdf' ? r.content.replace('PDF:', '') : null
-        }))
-      });
-    } catch (error) {
-      console.error('Superadmin history error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch request history'
-      });
-    }
-  }
-);
 
 // =======================   Processing-History Endpoints
 
@@ -1421,70 +1469,213 @@ app.delete('/api/jobs/:id', authenticateToken, async (req, res) => {
   }
 });
 
+ // ==================== PROCESSING HISTORY MANAGEMENT ====================
+// ==================== PROCESSING JOB MANAGEMENT ====================
+// ==================== PROCESSING HISTORY ENDPOINTS ====================
 
-// ==================== DEBUG ENDPOINTS (TEMPORARY) ====================
-app.get('/api/debug/pdf/:filename',
+
+// ==================== PROCESSING HISTORY ENDPOINTS ====================
+
+app.get('/api/processing-jobs', 
   authenticateToken,
+  requireRole('superadmin'),
   async (req, res) => {
     try {
-      const filename = decodeURIComponent(req.params.filename);
-      const filePath = path.join(uploadDir, filename);
-      
-      console.log('[DEBUG] PDF Request:', {
-        user: req.user.id,
-        requestedFile: filename,
-        path: filePath
-      });
-
-      if (!fs.existsSync(filePath)) {
-        console.error('[DEBUG] Missing PDF:', filePath);
-        return res.status(404).json({
-          success: false,
-          message: 'Debug: PDF not found in uploads directory'
-        });
+      const processingDir = path.join(__dirname, '..', 'processing_history');
+      if (!fs.existsSync(processingDir)) {
+        return res.json([]);
       }
-
-      // Temporary permission bypass for testing
-      res.sendFile(filePath, {
-        headers: {
-          'Content-Disposition': `inline; filename="${filename}"`
+      
+      const files = fs.readdirSync(processingDir);
+      const jobs = [];
+      
+      files.forEach(file => {
+        if (path.extname(file) === '.json') {
+          const filePath = path.join(processingDir, file);
+          const data = fs.readFileSync(filePath, 'utf8');
+          try {
+            const job = JSON.parse(data);
+            
+            // Ensure job has required properties
+            if (!job.jobId) job.jobId = file.replace('.json', '');
+            if (!job.type) job.type = file.startsWith('pdf-') ? 'pdf' : 'web';
+            if (!job.timestamp) job.timestamp = fs.statSync(filePath).mtime.toISOString();
+            if (!job.status) job.status = 'unknown';
+            if (!job.message) job.message = 'No status message';
+            
+            jobs.push(job);
+          } catch (e) {
+            console.error(`Error parsing ${file}:`, e);
+          }
         }
       });
-
+      
+      // Sort by timestamp (newest first)
+      jobs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      res.json(jobs);
+      
     } catch (error) {
-      console.error('[DEBUG] PDF Error:', error);
+      console.error('Processing jobs error:', error);
       res.status(500).json({
         success: false,
-        message: 'Debug: PDF retrieval failed'
+        message: 'Failed to load processing history'
       });
     }
   }
 );
 
-app.get('/api/debug/pdf-requests',
+
+app.delete('/api/processing-jobs/:jobId', 
   authenticateToken,
+  requireRole('superadmin'),
   async (req, res) => {
     try {
-      const [requests] = await pool.execute(
-        `SELECT kr.id, kr.admin_id, kr.content, kr.status, u.email 
-         FROM knowledge_requests kr
-         JOIN users u ON kr.admin_id = u.id
-         WHERE kr.type = 'pdf'`
-      );
+      const jobId = req.params.jobId;
+      const processingDir = path.join(__dirname, '..', 'processing_history');
+      const filePath = path.join(processingDir, `${jobId}.json`);
+      
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        res.json({ success: true });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: 'Job not found'
+        });
+      }
+    } catch (error) {
+      console.error('Delete job error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete job'
+      });
+    }
+  }
+);
 
-      res.json({
+// ==================== RETRY JOB ENDPOINT ====================
+app.post('/api/processing-jobs/:jobId/retry', 
+  authenticateToken,
+  requireRole('superadmin'),
+  async (req, res) => {
+    try {
+      const jobId = req.params.jobId;
+      const processingDir = path.join(__dirname, '..', 'processing_history');
+      const filePath = path.join(processingDir, `${jobId}.json`);
+      
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({
+          success: false,
+          message: 'Job not found'
+        });
+      }
+      
+      const jobData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      
+      if (jobData.type !== 'web') {
+        return res.status(400).json({
+          success: false,
+          message: 'Only web jobs can be retried'
+        });
+      }
+      
+      // Collect failed and unprocessed links
+      const linksToProcess = [];
+      
+      // Add failed links
+      if (jobData.failed && jobData.failed.length > 0) {
+        jobData.failed.forEach(failedLink => {
+          linksToProcess.push({
+            url: failedLink.url,
+            type: failedLink.type
+          });
+        });
+      }
+      
+      // Add unprocessed HTML links
+      if (jobData.html && jobData.html.length > 0) {
+        jobData.html.forEach(url => {
+          // Check if this URL was already processed
+          const wasProcessed = jobData.successful?.some(s => s.url === url) || 
+                               jobData.failed?.some(f => f.url === url);
+          
+          if (!wasProcessed) {
+            linksToProcess.push({
+              url: url,
+              type: 'html'
+            });
+          }
+        });
+      }
+      
+      // Add unprocessed PDF links
+      if (jobData.pdf && jobData.pdf.length > 0) {
+        jobData.pdf.forEach(url => {
+          // Check if this URL was already processed
+          const wasProcessed = jobData.successful?.some(s => s.url === url) || 
+                               jobData.failed?.some(f => f.url === url);
+          
+          if (!wasProcessed) {
+            linksToProcess.push({
+              url: url,
+              type: 'pdf'
+            });
+          }
+        });
+      }
+      
+      if (linksToProcess.length === 0) {
+        return res.json({ 
+          success: true,
+          message: 'No links to retry'
+        });
+      }
+      
+      // Create a new job
+      const newJobId = `retry-${Date.now()}`;
+      const newJobData = {
+        jobId: newJobId,
+        sourceUrl: jobData.sourceUrl,
+        start_time: new Date().toISOString(),
+        status: "processing",
+        total: linksToProcess.length,
+        processed: 0,
+        successful: [],
+        failed: [],
+        html: [],
+        pdf: [],
+        message: "Retrying failed and unprocessed links",
+        type: 'web'
+      };
+      
+      // Categorize links
+      linksToProcess.forEach(link => {
+        if (link.type === 'html') {
+          newJobData.html.push(link.url);
+        } else if (link.type === 'pdf') {
+          newJobData.pdf.push(link.url);
+        }
+      });
+      
+      const newFilePath = path.join(processingDir, `${newJobId}.json`);
+      fs.writeFileSync(newFilePath, JSON.stringify(newJobData, null, 2));
+      
+      // Start processing using the existing function
+      const { processLinks } = require('../proxy-server');
+      processLinks(newJobId, newFilePath);
+      
+      res.json({ 
         success: true,
-        requests: requests.map(r => ({
-          ...r,
-          filename: r.content.replace('PDF:', '')
-        }))
+        jobId: newJobId,
+        totalLinks: newJobData.total
       });
       
     } catch (error) {
-      console.error('[DEBUG] Request Error:', error);
+      console.error('Retry job error:', error);
       res.status(500).json({
         success: false,
-        message: 'Debug: Failed to fetch PDF requests'
+        message: 'Failed to retry job'
       });
     }
   }

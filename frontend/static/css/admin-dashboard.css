@@ -114,6 +114,12 @@ body {
     width: 100%;
 }
 
+
+.chartjs-render-monitor {
+    white-space: normal !important;
+    word-break: break-word !important;
+}
+
 .chart-container {
     background: white;
     border-radius: 8px;
@@ -351,9 +357,9 @@ body {
     font-weight: 500;
 }
 
-.status-tag.approved { color: #4CAF50; font-weight: 600; }
+.status-tag.approved { color: #03A31C; font-weight: 600; }
 .status-tag.pending { color: #FFC107; font-weight: 600; }
-.status-tag.rejected { color: #F44336; font-weight: 600; }
+.status-tag.rejected { color: red; font-weight: 600; }
 
 
 

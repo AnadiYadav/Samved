@@ -1,0 +1,9 @@
+{
+  "jobId": "pdf-1748945233975",
+  "filename": "nrsc-pdf-1748945233975.pdf",
+  "status": "failed",
+  "message": "Cannot read properties of null (reading 'pages')",
+  "pages": 0,
+  "timestamp": "2025-06-03T10:11:52.824Z",
+  "type": "pdf"
+}

@@ -11,3 +11,5 @@ mysql2
 ora@5.4.1
 path       
 undici
+node-fetch
+node-cron

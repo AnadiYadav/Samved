@@ -405,6 +405,110 @@ th {
     padding: 0 0.5rem;
 }
 
+/* ==================== PENDING REQUESTS TABLE SPECIFIC STYLES ==================== */
+#pendingRequestsTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.scrollable-table-container {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#pendingRequestsTable .request-title {
+    cursor: pointer;
+    color: #0066b2;
+    font-weight: bold;
+    padding: 12px 15px;
+}
+
+#pendingRequestsTable th {
+    padding: 12px 15px;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#pendingRequestsTable .request-title:hover {
+    text-decoration: underline;
+}
+
+#pendingRequestsTable .detail-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+#pendingRequestsTable .detail-section {
+    padding: 10px;
+}
+
+#pendingRequestsTable .description-box {
+    background-color: #e9ecef;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 4px solid #0066b2;
+}
+
+#pendingRequestsTable .pdf-link {
+    color: #d9534f;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    padding: 5px 10px;
+    background: #f8d7da;
+    border-radius: 4px;
+    margin-top: 8px;
+}
+
+#pendingRequestsTable .pdf-link:hover {
+    text-decoration: underline;
+    background: #f5c2c7;
+}
+
+#pendingRequestsTable .action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+#pendingRequestsTable .btn-approve, 
+#pendingRequestsTable .btn-reject {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+#pendingRequestsTable .btn-approve {
+    background: #03A31C;
+    color: white;
+}
+
+#pendingRequestsTable .btn-approve:hover {
+    background: #0cda38;
+}
+
+#pendingRequestsTable .btn-reject {
+    background: #dc3545;
+    color: white;
+}
+
+#pendingRequestsTable .btn-reject:hover {
+    background: #c82333;
+}
+
 
 /* =============== SUPERADMIN REQUEST HISTORY =============== */
 .nrsc-modal {
@@ -508,14 +612,121 @@ th {
     font-weight: 500;
 }
 
-.status-tag.approved { color: #4CAF50; }
+.status-tag.approved { color: #03A31C; }
 .status-tag.pending { color: #FFC107; }
-.status-tag.rejected { color: #F44336; }
+.status-tag.rejected { color: red; }
 
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
+/* Processing history */
+/* ==================== PROCESSING HISTORY STYLES ==================== */
+.processing-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  border-left: 4px solid;
+}
+
+.processing-history-item.processing {
+  border-color: #17a2b8;
+}
+
+.processing-history-item.completed {
+  border-color: #28a745;
+}
+
+.processing-history-item.failed {
+  border-color: #dc3545;
+}
+
+.processing-job-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+
+.processing-job-id {
+  font-weight: bold;
+  font-family: monospace;
+  margin-bottom: 5px;
+}
+
+.processing-job-status {
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  display: inline-block;
+  width: fit-content;
+}
+
+.processing-status-processing {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.processing-status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.processing-status-failed {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.processing-job-details {
+  flex: 1;
+  padding: 0 15px;
+}
+
+.processing-job-details p {
+  margin: 3px 0;
+}
+
+.processing-job-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.processing-delete-job, .processing-retry-job {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.processing-delete-job {
+  color: #dc3545;
+}
+
+.processing-delete-job:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+.processing-retry-job {
+  color: #007bff;
+}
+
+.processing-retry-job:hover {
+  background-color: #007bff;
+  color: white;
+}
+
 
 /* Responsive Design */
 @media (max-width: 1200px) {

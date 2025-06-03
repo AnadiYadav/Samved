@@ -80,9 +80,10 @@
             </div>
             
             <!-- Pending Requests Table -->
-            <div class="requests-table">
-                <h2>Pending Requests (<span id="pendingCount">15</span>)</h2>
-                <table>
+        <div class="requests-table">
+            <h2>Pending Requests (<span id="pendingCount">0</span>)</h2>
+            <div class="scrollable-table-container">
+                <table id="pendingRequestsTable">
                     <thead>
                         <tr>
                             <th>Admin Name</th>
@@ -96,6 +97,7 @@
                     </tbody>
                 </table>
             </div>
+        </div>
 
         <!-- Request History Modal Section-->
         <div id="requestHistoryModal" class="nrsc-modal">
@@ -180,7 +182,7 @@
                 </div>
                 
                 <div class="form-group" id="pdfFieldGroup" style="display:none">
-                    <label>PDF File*</label>
+                    <label>PDF File* (Max 500 Mb)</label>
                     <input type="file" id="infoPdf" accept=".pdf">
                 </div>
 
@@ -413,6 +415,7 @@
             font-size: 1.2rem;
             padding: 0 0.5rem;
         }
+
 </style>
 
     <script src="/frontend/static/js/dashboard.js"></script>

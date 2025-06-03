@@ -1,0 +1,240 @@
+{
+  "jobId": "job-1748517758986",
+  "sourceUrl": "https://www.nrsc.gov.in/Aboutus_NRSC",
+  "start_time": "2025-05-29T11:22:48.496Z",
+  "status": "completed",
+  "total": 32,
+  "processed": 32,
+  "successful": [
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_DMSS#main-content",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:22:50.662Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_DMSS#Top",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:22:56.946Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_ODS#main-content",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:22:57.818Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC#Top",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:22:58.207Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_DPPA#main-content",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:22:58.591Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_RSS#main-content",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:22:59.004Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_DRS",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:22:59.431Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_ODS",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:22:59.894Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_RSS",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:00.305Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_DRS#main-content",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:00.902Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_RSS#Top",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:01.259Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_Aerial",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:01.623Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_ODS#Top",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:02.025Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_Disaster_Image2#main-content",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:03.753Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_DMSS",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:04.482Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_Disaster_Image2#Top",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:05.328Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_Disaster_Image1#Top",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:06.077Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_RSA/page_1#main-content",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:06.651Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_Outreach",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:07.129Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_DRS#Top",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:07.740Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_Aerial#main-content",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:08.366Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_RSA/page_1",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:08.704Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_Aerial#Top",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:09.024Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_Disaster_Image1#main-content",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:09.312Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_Outreach#Top",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:09.604Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_RSA/page_1#Top",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:09.925Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_DPPA#Top",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:10.226Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_Disaster_Image1",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:10.499Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_DPPA",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:10.992Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_Disaster_Image2",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:11.289Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC#main-content",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:11.578Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Aboutus_NRSC_Outreach#main-content",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-05-29T11:23:11.912Z"
+    }
+  ],
+  "failed": [],
+  "html": [
+    "https://www.nrsc.gov.in/Aboutus_NRSC_DMSS#main-content",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_DMSS#Top",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_ODS#main-content",
+    "https://www.nrsc.gov.in/Aboutus_NRSC#Top",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_DPPA#main-content",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_RSS#main-content",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_DRS",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_ODS",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_RSS",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_DRS#main-content",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_RSS#Top",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_Aerial",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_ODS#Top",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_Disaster_Image2#main-content",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_DMSS",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_Disaster_Image2#Top",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_Disaster_Image1#Top",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_RSA/page_1#main-content",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_Outreach",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_DRS#Top",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_Aerial#main-content",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_RSA/page_1",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_Aerial#Top",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_Disaster_Image1#main-content",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_Outreach#Top",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_RSA/page_1#Top",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_DPPA#Top",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_Disaster_Image1",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_DPPA",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_Disaster_Image2",
+    "https://www.nrsc.gov.in/Aboutus_NRSC#main-content",
+    "https://www.nrsc.gov.in/Aboutus_NRSC_Outreach#main-content"
+  ],
+  "pdf": [],
+  "message": "All links processed successfully",
+  "end_time": "2025-05-29T11:23:11.913Z"
+}

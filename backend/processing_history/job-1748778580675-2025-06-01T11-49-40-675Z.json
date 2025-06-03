@@ -1,0 +1,267 @@
+{
+  "jobId": "job-1748778580675",
+  "sourceUrl": "https://bhuvan.nrsc.gov.in/home/index.php",
+  "start_time": "2025-06-01T11:49:42.836Z",
+  "status": "failed",
+  "total": 55,
+  "processed": 32,
+  "successful": [
+    {
+      "url": "https://bhuvan.nrsc.gov.in/home/index.php#feature-area",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:49:49.411Z"
+    },
+    {
+      "url": "https://bhuvan.nrsc.gov.in/home/index.php#applications_sector",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:49:56.700Z"
+    },
+    {
+      "url": "https://bhuvan.nrsc.gov.in/home/index.php#Contact",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:50:00.281Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/flood/doc/GJ_2024_28_08_VAP.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:50:20.176Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_2_31july2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:50:33.407Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_3_31july2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:51:12.460Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_7_6Aug2024.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "timestamp": "2025-06-01T11:54:30.923Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_8_6Aug2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:54:52.933Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:55:20.858Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/flood/doc/GJ_2024_28_08_VAP.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:55:32.919Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_2_31july2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:55:52.140Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_3_31july2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:56:35.295Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_7_6Aug2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:57:05.182Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_8_6Aug2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:57:24.950Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:57:59.258Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:58:35.737Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/flood/doc/GJ_2024_28_08_VAP.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:58:47.161Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_2_31july2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:59:00.893Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_3_31july2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T11:59:57.703Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_7_6Aug2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T12:00:39.709Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_8_6Aug2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T12:00:53.145Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T12:01:19.769Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/flood/doc/GJ_2024_28_08_VAP.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T12:01:28.168Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_2_31july2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T12:01:38.963Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_3_31july2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T12:02:04.528Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_7_6Aug2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T12:02:35.584Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_8_6Aug2024.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T12:03:20.679Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T12:04:16.563Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T12:05:10.282Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/flood/doc/GJ_2024_28_08_VAP.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "timestamp": "2025-06-01T12:05:25.615Z"
+    }
+  ],
+  "failed": [
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_2_31july2024.pdf",
+      "type": "pdf",
+      "attempts": 3,
+      "error": "request to http://0.0.0.0:7860/scrape-pdf failed, reason: connect ECONNREFUSED 0.0.0.0:7860",
+      "timestamp": "2025-06-01T12:31:04.548Z"
+    },
+    {
+      "url": "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_3_31july2024.pdf",
+      "type": "pdf",
+      "attempts": 3,
+      "error": "request to http://0.0.0.0:7860/scrape-pdf failed, reason: connect ECONNREFUSED 0.0.0.0:7860",
+      "timestamp": "2025-06-01T12:31:20.030Z"
+    }
+  ],
+  "html": [
+    "https://bhuvan.nrsc.gov.in/home/index.php#feature-area",
+    "https://bhuvan.nrsc.gov.in/home/index.php#applications_sector",
+    "https://bhuvan.nrsc.gov.in/home/index.php#Contact"
+  ],
+  "pdf": [
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/flood/doc/GJ_2024_28_08_VAP.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_2_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_3_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_7_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_8_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/flood/doc/GJ_2024_28_08_VAP.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_2_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_3_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_7_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_8_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/flood/doc/GJ_2024_28_08_VAP.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_2_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_3_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_7_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_8_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/flood/doc/GJ_2024_28_08_VAP.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_2_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_3_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_7_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_8_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/flood/doc/GJ_2024_28_08_VAP.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_2_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_3_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_7_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_8_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/flood/doc/GJ_2024_28_08_VAP.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_2_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_3_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_7_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_8_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/flood/doc/GJ_2024_28_08_VAP.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_2_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_3_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_7_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_8_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/flood/doc/GJ_2024_28_08_VAP.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_2_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_3_31july2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_7_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/disaster/usrtasks/landslide/doc/Charter_1029_VAP_8_6Aug2024.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf",
+    "https://bhuvan-app1.nrsc.gov.in/2dresources/NTL_Atlas.pdf"
+  ],
+  "message": "Processing stopped due to consecutive failures",
+  "end_time": "2025-06-01T12:31:20.034Z"
+}
