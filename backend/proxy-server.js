@@ -245,7 +245,7 @@ async function processLinks(jobId, filePath) {
         // Update file with initial status
         fs.writeFileSync(filePath, JSON.stringify(jobData, null, 2));
 
-        let consecutiveFailures = 0; // Track consecutive failures
+        let consecutiveFailures = 0; // Track consecutive failures (non-404 errors)
         
         // Progress bar function
         const renderProgressBar = (current, total, barLength = 20) => {
@@ -258,9 +258,10 @@ async function processLinks(jobId, filePath) {
         const processLink = async (url, type) => {
             let attempts = 0;
             let success = false;
+            let is404Error = false;
             let errorMessage = "";
             
-            while (attempts < 3 && !success) {
+            while (attempts < 3 && !success && !is404Error) {
                 attempts++;
                 try {
                     const controller = new AbortController();
@@ -294,16 +295,21 @@ async function processLinks(jobId, filePath) {
 
                     clearTimeout(timeoutId);
                     
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+                    if (response.ok) {
+                        await response.json();
+                        success = true;
+                        consecutiveFailures = 0; // Reset on success
+                        console.log(`✅ Successfully processed ${type.toUpperCase()}`);
+                    } else if (response.status === 404) {
+                        // Handle 404 errors specifically
+                        is404Error = true;
+                        errorMessage = `404 Not Found - Resource unavailable`;
+                        console.log(`🚫 404 Error - Skipping URL`);
+                    } else {
+                        // Handle other HTTP errors
+                        const errorText = await response.text();
+                        throw new Error(`HTTP ${response.status}: ${errorText}`);
                     }
-                    
-                    await response.json();
-                    success = true;
-                    consecutiveFailures = 0; // Reset on success
-                    
-                    // Show success indicator
-                    console.log(`✅ Successfully processed ${type.toUpperCase()}`);
                     
                 } catch (error) {
                     errorMessage = error.message;
@@ -317,7 +323,7 @@ async function processLinks(jobId, filePath) {
                 }
             }
             
-            return { success, attempts, error: errorMessage };
+            return { success, is404Error, attempts, error: errorMessage };
         };
 
         // Process HTML links
@@ -340,6 +346,18 @@ async function processLinks(jobId, filePath) {
                     attempts: result.attempts,
                     timestamp: new Date().toISOString()
                 });
+            } else if (result.is404Error) {
+                // Handle 404 errors - skip URL but don't count as failure
+                jobData.failed.push({
+                    url,
+                    type: 'html',
+                    attempts: result.attempts,
+                    error: result.error,
+                    status: '404',
+                    timestamp: new Date().toISOString()
+                });
+                console.log(`🚫 Skipped 404 URL: ${url}`);
+                // Do NOT increment consecutiveFailures for 404 errors
             } else {
                 jobData.failed.push({
                     url,
@@ -348,7 +366,7 @@ async function processLinks(jobId, filePath) {
                     error: result.error,
                     timestamp: new Date().toISOString()
                 });
-                consecutiveFailures++;
+                consecutiveFailures++; // Only increment for non-404 errors
             }
             
             // Update progress in temp file
@@ -377,6 +395,18 @@ async function processLinks(jobId, filePath) {
                         attempts: result.attempts,
                         timestamp: new Date().toISOString()
                     });
+                } else if (result.is404Error) {
+                    // Handle 404 errors - skip URL but don't count as failure
+                    jobData.failed.push({
+                        url,
+                        type: 'pdf',
+                        attempts: result.attempts,
+                        error: result.error,
+                        status: '404',
+                        timestamp: new Date().toISOString()
+                    });
+                    console.log(`🚫 Skipped 404 URL: ${url}`);
+                    // Do NOT increment consecutiveFailures for 404 errors
                 } else {
                     jobData.failed.push({
                         url,
@@ -385,7 +415,7 @@ async function processLinks(jobId, filePath) {
                         error: result.error,
                         timestamp: new Date().toISOString()
                     });
-                    consecutiveFailures++;
+                    consecutiveFailures++; // Only increment for non-404 errors
                 }
                 
                 // Update progress in temp file
@@ -401,7 +431,7 @@ async function processLinks(jobId, filePath) {
                 jobData.message = "All links processed successfully";
             } else {
                 jobData.status = "partially_completed";
-                jobData.message = `Processed with ${jobData.failed.length} failures`;
+                jobData.message = `Processed with ${jobData.failed.length} failures/skips`;
             }
         }
         
@@ -413,7 +443,8 @@ async function processLinks(jobId, filePath) {
         console.log(`\n[${jobId}] ${finalProgressBar} JOB ${jobData.status.toUpperCase()}`);
         console.log(`📝 Message: ${jobData.message}`);
         console.log(`✅ Successful: ${jobData.successful.length}`);
-        console.log(`❌ Failed: ${jobData.failed.length}`);
+        console.log(`🚫 404 Skipped: ${jobData.failed.filter(f => f.status === '404').length}`);
+        console.log(`❌ Failed: ${jobData.failed.filter(f => f.status !== '404').length}`);
         console.log(`📁 Log file preserved at: ${filePath}`);
 
     } catch (error) {
@@ -580,15 +611,26 @@ cron.schedule('0 0 * * *', () => {
 loadUrls();
 
 
-
-
-app.listen(3001, () => {
-    setTimeout(() => {
-        spinner.succeed(chalk.green(`Proxy Server running on port 3001!`));
-        // console.log(chalk.cyanBright('Welcome to ISRO Chatbot backend!'));
-    }, 1000);
-});
-
 module.exports = {
   processLinks
 };
+
+// ==================== SERVER INITIALIZATION ====================
+// Only start the server if not already running
+let serverStarted = false;
+
+function startProxyServer() {
+    if (!serverStarted) {
+        app.listen(3001, () => {
+            setTimeout(() => {
+                spinner.succeed(chalk.green(`Proxy Server running on port 3001!`));
+            }, 1000);
+        });
+        serverStarted = true;
+    }
+}
+
+// Start the server only once
+startProxyServer();
+
+

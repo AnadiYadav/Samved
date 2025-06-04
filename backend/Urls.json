@@ -64,5 +64,11 @@
     "nextScrape": "2025-06-18T22:00:00.000Z",
     "interval": 10,
     "retryCount": 0
+  },
+  {
+    "url": "https://www.nrsc.gov.in/Knowledge_EBooks",
+    "nextScrape": "2025-06-19T22:00:00.000Z",
+    "interval": 10,
+    "retryCount": 0
   }
 ]

@@ -118,18 +118,30 @@ const authenticateToken = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     
-    // Verify session exists in database and isn't expired
+    // Verify session exists in database
     const [sessions] = await pool.execute(
-      'SELECT * FROM active_sessions WHERE user_id = ? AND session_token = ? AND expires_at > NOW()',
+      'SELECT * FROM active_sessions WHERE user_id = ? AND session_token = ?',
       [decoded.id, token]
     );
 
     if (sessions.length === 0) {
-      // Clear invalid cookie
-      res.clearCookie('authToken');
       return res.status(403).json({ 
         success: false,
         message: 'Session expired or invalid' 
+      });
+    }
+
+    // Check expiration separately
+    const expiresAt = new Date(sessions[0].expires_at);
+    if (expiresAt < new Date()) {
+      // Clean up expired session
+      await pool.execute(
+        'DELETE FROM active_sessions WHERE session_token = ?',
+        [token]
+      );
+      return res.status(403).json({ 
+        success: false,
+        message: 'Session expired' 
       });
     }
 
@@ -137,13 +149,71 @@ const authenticateToken = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Authentication error:', error);
-    res.clearCookie('authToken');
-    res.status(403).json({ 
+    
+    // Handle specific JWT errors
+    if (error.name === 'TokenExpiredError') {
+            return res.status(403).json({ 
+                success: false,
+                message: 'Your session has expired. Please log in again.' 
+            });
+        }
+        
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(400).json({ 
+                success: false,
+                message: 'Invalid session token. Please log in again.' 
+            });
+        }
+    
+    // For other errors, don't clear cookie
+    return res.status(500).json({ 
       success: false,
-      message: 'Invalid or expired token' 
+      message: 'Authentication server error' 
     });
   }
 };
+
+
+// ==================== TOKEN REFRESH ENDPOINT ====================
+app.post('/api/refresh-token', authenticateToken, async (req, res) => {
+  try {
+    // Create new token
+    const newToken = jwt.sign(
+      { 
+        id: req.user.id,
+        role: req.user.role,
+        iss: 'nrsc-auth-server'
+      },
+      JWT_SECRET,
+      { expiresIn: TOKEN_EXPIRY }
+    );
+
+    // Update session in database
+    const expiresAt = new Date(Date.now() + 3600000);
+    await pool.execute(
+      'UPDATE active_sessions SET session_token = ?, expires_at = ? WHERE user_id = ? AND session_token = ?',
+      [newToken, expiresAt, req.user.id, req.cookies.authToken]
+    );
+
+    res.cookie('authToken', newToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 3600000,
+      path: '/'
+    }).json({
+      success: true,
+      message: 'Token refreshed'
+    });
+    
+  } catch (error) {
+    console.error('Token refresh error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to refresh token'
+    });
+  }
+});
 
 // ==================== ROLE-BASED ACCESS MIDDLEWARE ====================
 const requireRole = (requiredRole) => {
@@ -1663,7 +1733,14 @@ app.post('/api/processing-jobs/:jobId/retry',
       
       // Start processing using the existing function
       const { processLinks } = require('../proxy-server');
-      processLinks(newJobId, newFilePath);
+      // Run processing in background without blocking
+      setImmediate(() => {
+        try {
+          processLinks(newJobId, newFilePath);
+        } catch (error) {
+          console.error(`❌ Retry job failed: ${error.message}`);
+        }
+      });
       
       res.json({ 
         success: true,

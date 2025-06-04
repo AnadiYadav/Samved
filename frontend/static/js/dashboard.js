@@ -23,6 +23,30 @@ function getAuthToken() {
     return cookie ? cookie.split('=')[1] : null;
 }
 
+// ==================== TOKEN REFRESH FUNCTION ====================
+async function refreshAuthToken() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/refresh-token`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Token refresh failed');
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Token refresh error:', error);
+        return false;
+    }
+}
+
 // Initialize Dashboard
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -447,6 +471,14 @@ function updateApprovalChart(pendingCount) {
 // Handle request approval/rejection
 async function handleRequestAction(requestId, action) {
     try {
+
+        // Refresh token before operation
+        const tokenRefreshed = await refreshAuthToken();
+        if (!tokenRefreshed) {
+            throw new Error('Session maintenance failed');
+        }
+
+
         const response = await fetch(`${API_BASE_URL}/knowledge-requests/${requestId}/${action}`, {
             method: 'POST',
             credentials: 'include',
@@ -714,6 +746,14 @@ document.getElementById('informationForm').addEventListener('submit', async (e) 
     const PROXY_URL = 'http://localhost:3001/proxy';
 
     try {
+
+        // Refresh token before operation
+        const tokenRefreshed = await refreshAuthToken();
+        if (!tokenRefreshed) {
+            throw new Error('Session maintenance failed');
+        }
+
+
         const contentType = document.getElementById('infoType').value;
         if (!contentType) {
             alert('Please select a content type');
@@ -923,6 +963,14 @@ async function deleteProcessingJob(jobId) {
 
 async function retryProcessingJob(jobId) {
   try {
+
+    // Refresh token before operation
+        const tokenRefreshed = await refreshAuthToken();
+        if (!tokenRefreshed) {
+            throw new Error('Session maintenance failed');
+        }
+
+
     const response = await fetch(`${API_BASE_URL}/processing-jobs/${jobId}/retry`, {
       method: 'POST',
       credentials: 'include',
@@ -996,11 +1044,15 @@ function deleteJob(jobId) {
 }
 
 
-
-// Initialize history display on page load
-// updateHistoryDisplay();
-
-
+// ==================== BACKGROUND TOKEN REFRESH ====================
+setInterval(async () => {
+    try {
+        await refreshAuthToken();
+        console.log('Background token refresh successful');
+    } catch (error) {
+        console.log('Background token refresh failed');
+    }
+}, 30 * 60 * 1000); // Every 30 minutes
 
 
 // Logout Handler 
