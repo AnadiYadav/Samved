@@ -418,6 +418,20 @@
 
 </style>
 
-    <script src="/frontend/static/js/dashboard.js"></script>
+<script src="/frontend/static/js/dashboard.js"></script>
+<script>
+        // Clear legacy cookies on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Remove any existing authToken cookies
+            document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            
+            // Clear localStorage if no token exists
+            if (!localStorage.getItem('nrscAuthToken')) {
+                localStorage.removeItem('nrscAuthToken');
+            }
+        });
+</script>
+
+
 </body>
 </html>

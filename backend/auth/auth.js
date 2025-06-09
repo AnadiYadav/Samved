@@ -63,9 +63,11 @@ app.use(helmet.hsts({
   preload: true
 }));
 app.use(rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: 'Too many requests from this IP'
+  windowMs: 10 * 60 * 1000, // 15 minutes
+  max: 500,                  
+  standardHeaders: true,     // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false,      // Disable the `X-RateLimit-*` headers
+  message: 'Too many requests from this IP, please try again after 15 minutes'
 }));
 
 app.use(helmet.contentSecurityPolicy({
@@ -81,11 +83,13 @@ app.use(helmet.contentSecurityPolicy({
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://127.0.0.1:5500',
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE' , 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With','X-Query-Source']
 }));
 
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.raw({ limit: '500mb' }));
 app.use(cookieParser());
 app.disable('x-powered-by');
 
@@ -106,7 +110,7 @@ const TOKEN_EXPIRY = '1h';
 
 // ==================== AUTHENTICATION MIDDLEWARE ====================
 const authenticateToken = async (req, res, next) => {
-  const token = req.cookies.authToken || req.headers['authorization']?.split(' ')[1];
+  const token = req.headers.authorization?.split(' ')[1];
   
   if (!token) {
     return res.status(401).json({ 
@@ -173,47 +177,6 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-
-// ==================== TOKEN REFRESH ENDPOINT ====================
-app.post('/api/refresh-token', authenticateToken, async (req, res) => {
-  try {
-    // Create new token
-    const newToken = jwt.sign(
-      { 
-        id: req.user.id,
-        role: req.user.role,
-        iss: 'nrsc-auth-server'
-      },
-      JWT_SECRET,
-      { expiresIn: TOKEN_EXPIRY }
-    );
-
-    // Update session in database
-    const expiresAt = new Date(Date.now() + 3600000);
-    await pool.execute(
-      'UPDATE active_sessions SET session_token = ?, expires_at = ? WHERE user_id = ? AND session_token = ?',
-      [newToken, expiresAt, req.user.id, req.cookies.authToken]
-    );
-
-    res.cookie('authToken', newToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 3600000,
-      path: '/'
-    }).json({
-      success: true,
-      message: 'Token refreshed'
-    });
-    
-  } catch (error) {
-    console.error('Token refresh error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to refresh token'
-    });
-  }
-});
 
 // ==================== ROLE-BASED ACCESS MIDDLEWARE ====================
 const requireRole = (requiredRole) => {
@@ -307,11 +270,11 @@ app.post('/api/login', [
 
     const user = users[0];
     
-    // Delete existing sessions for this user
-    await pool.execute(
-      'DELETE FROM active_sessions WHERE user_id = ?',
-      [user.id]
-    );
+    // // Delete existing sessions for this user
+    // await pool.execute(
+    //   'DELETE FROM active_sessions WHERE user_id = ?',
+    //   [user.id]
+    // );
 
     const token = jwt.sign(
       { 
@@ -336,16 +299,12 @@ app.post('/api/login', [
         new Date(Date.now() + 3600000)
       ]
     );
-
-    res.cookie('authToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 3600000,
-      path: '/'
-    }).json({
+    
+    
+    res.json({
       success: true,
       message: 'Login successful',
+      token: token, 
       user: {
         id: user.id,
         email: user.email,
@@ -365,18 +324,18 @@ app.post('/api/login', [
 // ==================== LOGOUT ENDPOINT ====================
 app.post('/api/logout', authenticateToken, async (req, res) => {
   try {
-    // Delete current session from database
-    await pool.execute(
-      'DELETE FROM active_sessions WHERE session_token = ?',
-      [req.cookies.authToken]
-    );
+    // **FIXED**: Get token from the Authorization header
+    const token = req.headers.authorization?.split(' ')[1];
 
-    // Clear authentication cookie
-    res.clearCookie('authToken', {
-      path: '/',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production'
-    }).json({
+    if (token) {
+        // Delete current session from database
+        await pool.execute(
+            'DELETE FROM active_sessions WHERE session_token = ?',
+            [token]
+        );
+    }
+
+    res.json({
       success: true,
       message: 'Logout successful'
     });
@@ -986,58 +945,71 @@ app.post('/api/knowledge-requests/:id/:action',
 
 
 // ==================== KNOWLEDGE FILE DOWNLOAD ENDPOINT ====================
+// ==================== KNOWLEDGE FILE DOWNLOAD ENDPOINT ====================
 app.get('/api/knowledge-files/:filename',
-  authenticateToken,
+  authenticateToken, // Middleware runs first, authenticating the user
   async (req, res) => {
     try {
       const filename = decodeURIComponent(req.params.filename);
       const filePath = path.join(uploadDir, filename);
-      
+
+      // 1. Check if the file physically exists on the server
       if (!fs.existsSync(filePath)) {
         return res.status(404).json({
           success: false,
-          message: 'NRSC error: File not found'
+          message: 'File not found on the server.'
         });
       }
 
-      // Verify the user has permission to access this file
-      const [request] = await pool.execute(
-        `SELECT kr.admin_id, u.role 
-         FROM knowledge_requests kr
-         JOIN users u ON kr.admin_id = u.id
-         WHERE kr.content = ? AND kr.type = 'pdf'`,
-        [`PDF:${filename}`]
-      );
-
-      // Allow access for superadmin or the original admin
-      if (request.length > 0 && 
-          (request[0].admin_id === req.user.id || 
-           request[0].role === 'superadmin' || 
-           req.user.role === 'superadmin')) {
-        res.sendFile(filePath, {
-          headers: {
-            'Content-Disposition': `inline; filename="${filename}"`
-          }
-        });
+      // 2. Since the user is authenticated, we just need to check if a superadmin is accessing it,
+      //    or if a regular admin is accessing a file they submitted.
+      let hasPermission = false;
+      
+      // A superadmin can access any file.
+      if (req.user.role === 'superadmin') {
+        hasPermission = true;
       } else {
-        res.status(403).json({
+        // An admin can only access files they submitted.
+        const [request] = await pool.execute(
+          `SELECT admin_id FROM knowledge_requests WHERE content = ? AND admin_id = ?`,
+          [`PDF:${filename}`, req.user.id]
+        );
+        if (request.length > 0) {
+          hasPermission = true;
+        }
+      }
+
+      // 3. If they don't have permission, deny access.
+      if (!hasPermission) {
+        return res.status(403).json({
           success: false,
-          message: 'NRSC security: Unauthorized access'
+          message: 'You do not have permission to access this file.'
         });
       }
+
+      // 4. If everything is okay, send the file.
+      res.sendFile(filePath, {
+        headers: {
+            // This header tells the browser to display the PDF inline, not download it.
+            'Content-Disposition': `inline; filename="${filename}"`
+        }
+      });
+
     } catch (error) {
       console.error('NRSC File download error:', error);
       res.status(500).json({
         success: false,
-        message: 'NRSC system: File retrieval failed'
+        message: 'An internal server error occurred while retrieving the file.'
       });
     }
   }
 );
 
+
+
 // ==================== ADMIN MANAGEMENT ENDPOINTS ====================
 
-// Create Admin Endpoint (Fixed with proper validation and error handling)
+// Create Admin Endpoint 
 app.post('/api/create-admin', 
   authenticateToken,
   requireRole('superadmin'),
@@ -1248,7 +1220,7 @@ app.get('/api/admin/category-stats',
         "Applications",
         "Remote Sensing and GIS",
         "International Collaboration and Cooperation",
-        "general-questions"
+        "General Questions"
       ];
       
       // Initialize category counters
@@ -1291,6 +1263,74 @@ app.get('/api/admin/category-stats',
     }
   }
 );
+
+
+// ==================== SUPERADMIN FAQ ANALYTICS ENDPOINT ====================
+app.get('/api/superadmin/category-stats', 
+  authenticateToken,
+  requireRole('superadmin'),
+  async (req, res) => {
+    try {
+      // Fetch category data from analytics service
+      const response = await fetch('http://0.0.0.0:7860/category');
+      const { nqueries } = await response.json();
+      
+      // Get current date and 30 days ago
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      // Define our target categories
+      const targetCategories = [
+        "Data Products, Services and Policies",
+        "EO Missions",
+        "Applications",
+        "Remote Sensing and GIS",
+        "International Collaboration and Cooperation",
+        "General Questions"
+      ];
+      
+      // Initialize category counters
+      const categoryCounts = {};
+      targetCategories.forEach(cat => {
+        categoryCounts[cat] = 0;
+      });
+      
+      // Process each query
+      for (let i = 0; i < nqueries.time.length; i++) {
+        const queryTime = new Date(nqueries.time[i]);
+        
+        // Filter queries from last 30 days
+        if (queryTime >= thirtyDaysAgo) {
+          const categories = nqueries.category[i];
+          
+          // Count each target category
+          categories.forEach(cat => {
+            if (targetCategories.includes(cat)) {
+              categoryCounts[cat]++;
+            }
+          });
+        }
+      }
+      
+      res.json({
+        success: true,
+        data: {
+          labels: targetCategories,
+          counts: Object.values(categoryCounts)
+        }
+      });
+      
+    } catch (error) {
+      console.error('Superadmin category stats error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch category analytics'
+      });
+    }
+  }
+);
+
 
 // ==================== SENTIMENT ANALYSIS ENDPOINT (ADMIN + SUPERADMIN) ====================
 // ADMIN SENTIMENT ENDPOINT ==================== 

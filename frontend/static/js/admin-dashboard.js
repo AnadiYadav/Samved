@@ -7,22 +7,44 @@
 const API_BASE_URL = 'http://localhost:3000/api';
 
 
+
+// ==================== AUTH TOKEN MANAGEMENT ====================
+const TOKEN_KEY = 'nrscAuthToken';
+
+// Get token from localStorage
+function getAuthToken() {
+    return localStorage.getItem(TOKEN_KEY);
+}
+
+// Remove token from localStorage
+function removeAuthToken() {
+    localStorage.removeItem(TOKEN_KEY);
+}
+
+
 // Initialize Dashboard with Authentication Check
 document.addEventListener('DOMContentLoaded', async () => {
+
+        const token = getAuthToken();
+        if (!token) {
+            window.location.href = '/frontend/templates/admin-login.html';
+            return;
+        }
+
     try {
         // Verify authentication status
         const authCheck = await fetch(`${API_BASE_URL}/admin-data`, {
             method: 'GET',
-            credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             }
         });
 
         const authData = await authCheck.json();
         
         if (!authCheck.ok || authData.user.role !== 'admin') {
-            document.cookie = 'authToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            removeAuthToken(); 
             window.location.href = '/frontend/templates/admin-login.html';
             return;
         }
@@ -35,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setInterval(() => {
             loadActiveSessions();
             loadTotalQueries(); // Refresh daily count periodically
-        }, 30000);
+        }, 120000);
         
         // Form submission handler
         document.getElementById('knowledgeForm').addEventListener('submit', handleKnowledgeSubmission);
@@ -43,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     } catch (error) {
         console.error('Authentication check failed:', error);
-        document.cookie = 'authToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        removeAuthToken();
         window.location.href = '/frontend/templates/admin-login.html';
     }
 });
@@ -139,9 +161,8 @@ async function initializeCharts() {
     
     try {
         const response = await fetch(`${API_BASE_URL}/visitor-stats`, {
-            credentials: 'include',
             headers: {
-                'Authorization': `Bearer ${getAuthToken()}`
+            'Authorization': `Bearer ${getAuthToken()}`
             }
         });
         
@@ -268,7 +289,9 @@ function initializeFallbackChart() {
 
      // Fetch real approval stats from API
      const statsResponse = await fetch(`${API_BASE_URL}/my-approval-stats`, {
-        credentials: 'include'
+        headers: {
+        'Authorization': `Bearer ${getAuthToken()}`
+        }
     });
     const statsData = await statsResponse.json();
     
@@ -307,7 +330,9 @@ function initializeFallbackChart() {
 async function loadActiveSessions() {
     try {
         const response = await fetch(`${API_BASE_URL}/my-active-sessions`, {
-            credentials: 'include'
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
         });
         const data = await response.json();
         document.getElementById('activeSessions').textContent = data.count;
@@ -320,7 +345,9 @@ async function loadActiveSessions() {
 async function loadPendingRequests() {
     try {
         const response = await fetch(`${API_BASE_URL}/my-pending-requests`, {
-            credentials: 'include'
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
         });
         const data = await response.json();
         document.getElementById('pendingRequests').textContent = data.count;
@@ -345,9 +372,12 @@ async function handleKnowledgeSubmission(e) {
     }
 
     try {
+        const token = getAuthToken();
         const response = await fetch(`${API_BASE_URL}/knowledge-requests`, {
             method: 'POST',
-            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
             body: formData
         });
 
@@ -372,7 +402,9 @@ async function showRequestHistory() {
     try {
         document.getElementById('requestHistoryModal').style.display = 'block';
         const response = await fetch(`${API_BASE_URL}/my-request-history`, {
-            credentials: 'include'
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
         });
         const { requests } = await response.json();
         populateHistoryTable(requests);
@@ -382,13 +414,6 @@ async function showRequestHistory() {
     }
 }
 
-
-// ==================== AUTH TOKEN HANDLER ====================
-function getAuthToken() {
-    const cookie = document.cookie.split('; ')
-    .find(row => row.startsWith('authToken='));
-    return cookie ? cookie.split('=')[1] : null;
-}
 
 // ==================== ADMIN Total QUERIES ====================
 // ==================== COMPLETE DAILY QUERIES HANDLER ====================
@@ -534,14 +559,19 @@ function showErrorToast(message) {
 
 
 // Logout Handler
-function handleLogout() {
-    fetch(`${API_BASE_URL}/logout`, {
-        method: 'POST',
-        credentials: 'include'
-    }).then(() => {
+async function handleLogout() {
+    try {
+        await fetch(`${API_BASE_URL}/logout`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+    } finally {
+        removeAuthToken();
         window.location.href = '/frontend/templates/admin-login.html';
-    }).catch(error => {
-        console.error('Logout Error:', error);
-    });
+    }
 }
 //working

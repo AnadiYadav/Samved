@@ -16,46 +16,40 @@ const adminModal = document.getElementById('adminModal');
 const adminForm = document.getElementById('adminForm');
 
 
-// ==================== COMMON AUTH TOKEN ====================
+// ==================== AUTH TOKEN MANAGEMENT ====================
+const TOKEN_KEY = 'nrscAuthToken';
+
+// Get token from localStorage
 function getAuthToken() {
-    const cookie = document.cookie.split('; ')
-        .find(row => row.startsWith('authToken='));
-    return cookie ? cookie.split('=')[1] : null;
+    return localStorage.getItem(TOKEN_KEY);
 }
 
-// ==================== TOKEN REFRESH FUNCTION ====================
-async function refreshAuthToken() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/refresh-token`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getAuthToken()}`
-            }
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Token refresh failed');
-        }
-        
-        return true;
-    } catch (error) {
-        console.error('Token refresh error:', error);
-        return false;
-    }
+// Remove token from localStorage
+function removeAuthToken() {
+    localStorage.removeItem(TOKEN_KEY);
 }
+
+
+
 
 // Initialize Dashboard
 document.addEventListener('DOMContentLoaded', async () => {
+    
+    // Check if token exists
+    const token = getAuthToken();
+    if (!token) {
+        window.location.href = '/frontend/templates/admin-login.html';
+        return;
+    }
+    
+    
     try {
         const authCheck = await fetch(`${API_BASE_URL}/admin-data`, {
             method: 'GET',
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getAuthToken()}`
+                'Authorization': `Bearer ${token}`
             }
         });
 
@@ -77,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setInterval(() => {
             loadActiveSessions();
             loadTotalQueries();
-        }, 30000);
+        }, 120000);
 
         logoutBtn.addEventListener('click', handleLogout);
         addAdminBtn.addEventListener('click', showAdminForm);
@@ -85,7 +79,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     } catch (error) {
         console.error('Authentication check failed:', error);
-        document.cookie = 'authToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        removeAuthToken();
+        // document.cookie = 'authToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         window.location.href = '/frontend/templates/admin-login.html';
     }
 });
@@ -94,25 +89,73 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function initializeCharts() {
     // Frequently Asked Questions Chart
     const faqCtx = document.getElementById('faqChart').getContext('2d');
-    new Chart(faqCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Satellite Data', 'GIS Mapping', 'Weather', 'Sensors', 'Other'],
-            datasets: [{
-                label: 'Questions Count',
-                data: [65, 59, 80, 81, 56],
-                backgroundColor: 'rgba(0, 102, 178, 0.8)',
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/superadmin/category-stats`, {
+                credentials: 'include',
+                headers: {
+                    'Authorization': `Bearer ${getAuthToken()}`
+                }
+            });
+            
+            if (!response.ok) throw new Error('Failed to fetch FAQ data');
+            
+            const { data } = await response.json();
+
+            // Define abbreviations for long labels
+            const labelAbbreviations = {
+                "Data Products, Services and Policies": "Data Products",
+                "EO Missions": "EO Missions",
+                "Applications": "Applications",
+                "Remote Sensing and GIS": "Remote Sensing & GIS",
+                "International Collaboration and Cooperation": "Intrnl. Collaboration"
+            };
+            
+            // Use abbreviations for display
+            const displayLabels = data.labels.map(label => 
+                labelAbbreviations[label] || label
+            );
+            
+            new Chart(faqCtx, {
+                type: 'bar',
+                data: {
+                    labels: displayLabels,
+                    datasets: [{
+                        label: 'Questions Count',
+                        data: data.counts,
+                        backgroundColor: 'rgba(0, 102, 178, 0.8)',
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 30,
+                                autoSkip: false,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('FAQ chart error:', error);
+            // Fallback to empty chart
+            new Chart(faqCtx, {
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
         }
-    });
 
     // APPROVAL CHART INITIALIZATION ====================
     initializeApprovalChart();
@@ -343,7 +386,10 @@ function initializeFallbackChart() {
 async function loadActiveSessions() {
     try {
         const response = await fetch(`${API_BASE_URL}/active-sessions`, {
-            credentials: 'include'
+            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
         });
         const data = await response.json();
         document.getElementById('activeSessions').textContent = data.count;
@@ -358,7 +404,10 @@ let currentExpandedRequest = null;
 async function loadPendingRequests() {
     try {
         const response = await fetch(`${API_BASE_URL}/knowledge-requests/pending`, {
-            credentials: 'include'
+            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
         });
         
         if (!response.ok) throw new Error('Failed to fetch requests');
@@ -392,11 +441,10 @@ async function loadPendingRequests() {
                             <p><strong>Submitted At:</strong> ${new Date(request.created_at).toLocaleString('en-IN')}</p>
                             ${request.type === 'pdf' ? 
                                 `<p><strong>Document:</strong> 
-                                    <a href="${API_BASE_URL}/knowledge-files/${encodeURIComponent(request.content.replace('PDF:', ''))}" 
-                                       target="_blank" 
-                                       class="pdf-link">
+                                    <button class="pdf-link" 
+                                            onclick="viewPdf('${request.content.replace('PDF:', '')}')">
                                         ${request.content.replace('PDF:', '')}
-                                    </a>
+                                    </button>
                                 </p>` : 
                                 `<p><strong>Content:</strong><br>${request.content}</p>`
                             }
@@ -472,12 +520,6 @@ function updateApprovalChart(pendingCount) {
 async function handleRequestAction(requestId, action) {
     try {
 
-        // Refresh token before operation
-        const tokenRefreshed = await refreshAuthToken();
-        if (!tokenRefreshed) {
-            throw new Error('Session maintenance failed');
-        }
-
 
         const response = await fetch(`${API_BASE_URL}/knowledge-requests/${requestId}/${action}`, {
             method: 'POST',
@@ -504,6 +546,41 @@ async function handleRequestAction(requestId, action) {
     }
 }
 
+
+/**
+ * Fetches a PDF using an auth token and opens it in a new tab.
+ * @param {string} filename The name of the PDF file to fetch.
+ */
+async function viewPdf(filename) {
+    try {
+        const token = getAuthToken();
+        if (!token) {
+            alert('Authentication session has expired. Please log in again.');
+            return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/knowledge-files/${encodeURIComponent(filename)}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Failed to load PDF: ${response.statusText}`);
+        }
+
+        const pdfBlob = await response.blob();
+        const blobUrl = URL.createObjectURL(pdfBlob);
+        window.open(blobUrl, '_blank');
+
+    } catch (error) {
+        console.error('PDF view error:', error);
+        alert(`Could not display PDF: ${error.message}`);
+    }
+}
+
+
 // Process approved content (placeholder for vector store integration)
 async function processApprovedContent(result) {
     console.log('NRSC: Processing approved content', result);
@@ -529,11 +606,19 @@ async function handleAdminCreation(e) {
     };
 
     try {
+
+        const token = getAuthToken(); // Get the token
+
+        if (!token) {
+            alert('Authentication session has expired. Please log in again.');
+            return;
+        }
+
         const response = await fetch(`${API_BASE_URL}/create-admin`, {
             method: 'POST',
-            credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(adminData)
         });
@@ -546,6 +631,7 @@ async function handleAdminCreation(e) {
 
         alert('NRSC: Admin created successfully!');
         closeModal();
+        loadTotalAdmins();
     } catch (error) {
         console.error('NRSC Admin Creation Error:', error);
         alert(`NRSC Error: ${error.message}`);
@@ -580,7 +666,10 @@ function toggleInfoField() {
 async function loadTotalAdmins() {
     try {
         const response = await fetch(`${API_BASE_URL}/total-admins`, {
-            credentials: 'include'
+            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
         });
         const data = await response.json();
         document.getElementById('totalAdmins').textContent = data.count;
@@ -590,7 +679,7 @@ async function loadTotalAdmins() {
 }
 
 
-// Replace existing request history functions with:
+//====================  request history functions 
 
 let currentExpandedId = null;
 
@@ -609,10 +698,11 @@ function closeRequestHistory() {
 // Load Superadmin Request History
 async function loadSuperadminRequestHistory() {
     try {
+        const token=getAuthToken();
         const response = await fetch(`${API_BASE_URL}/superadmin/request-history`, {
             credentials: 'include',
             headers: {
-                'Authorization': `Bearer ${getAuthToken()}`
+                'Authorization': `Bearer ${token}`
             }
         });
         
@@ -649,10 +739,10 @@ function populateSuperadminHistoryTable(requests) {
                         ${request.type === 'pdf' ? 
                             `<div class="pdf-filename">
                                 <strong>Document:</strong> 
-                                <a href="${API_BASE_URL}/knowledge-files/${encodeURIComponent(request.content.replace('PDF:', ''))}" 
-                                   target="_blank">
+                                <button class="pdf-link" 
+                                        onclick="viewPdf('${request.content.replace('PDF:', '')}')">
                                     ${request.content.replace('PDF:', '')}
-                                </a>
+                                </button>
                             </div>` : 
                             `<p><strong>Content:</strong><br>${request.content}</p>`
                         }
@@ -746,14 +836,6 @@ document.getElementById('informationForm').addEventListener('submit', async (e) 
     const PROXY_URL = 'http://localhost:3001/proxy';
 
     try {
-
-        // Refresh token before operation
-        const tokenRefreshed = await refreshAuthToken();
-        if (!tokenRefreshed) {
-            throw new Error('Session maintenance failed');
-        }
-
-
         const contentType = document.getElementById('infoType').value;
         if (!contentType) {
             alert('Please select a content type');
@@ -762,6 +844,7 @@ document.getElementById('informationForm').addEventListener('submit', async (e) 
 
         statusElement.style.display = 'block';
         statusElement.querySelector('.toast-content').textContent = 'Initializing processing...';
+
 
         if (contentType === 'link') {
             const url = document.getElementById('infoUrl').value;
@@ -775,7 +858,8 @@ document.getElementById('informationForm').addEventListener('submit', async (e) 
 
             const response = await fetch(`${PROXY_URL}/initiate-processing`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: {'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({ url: url })
             });
 
@@ -963,14 +1047,6 @@ async function deleteProcessingJob(jobId) {
 
 async function retryProcessingJob(jobId) {
   try {
-
-    // Refresh token before operation
-        const tokenRefreshed = await refreshAuthToken();
-        if (!tokenRefreshed) {
-            throw new Error('Session maintenance failed');
-        }
-
-
     const response = await fetch(`${API_BASE_URL}/processing-jobs/${jobId}/retry`, {
       method: 'POST',
       credentials: 'include',
@@ -1044,25 +1120,19 @@ function deleteJob(jobId) {
 }
 
 
-// ==================== BACKGROUND TOKEN REFRESH ====================
-setInterval(async () => {
+
+// ==================== LOGOUT HANDLER ====================
+async function handleLogout() {
     try {
-        await refreshAuthToken();
-        console.log('Background token refresh successful');
-    } catch (error) {
-        console.log('Background token refresh failed');
-    }
-}, 30 * 60 * 1000); // Every 30 minutes
-
-
-// Logout Handler 
-function handleLogout() {
-    fetch(`${API_BASE_URL}/logout`, {
-        method: 'POST',
-        credentials: 'include'
-    }).then(() => {
+        await fetch(`${API_BASE_URL}/logout`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            }
+        });
+        removeAuthToken();
         window.location.href = '/frontend/templates/admin-login.html';
-    }).catch(error => {
-        console.error('NRSC Logout Error:', error);
-    });
+    } catch (error) {
+        console.error('Logout error:', error);
+    }
 }

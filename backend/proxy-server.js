@@ -571,7 +571,7 @@ cron.schedule('0 0 * * *', () => {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ url: entry.url }),
-                    timeout: 3600000 // 1 hour timeout
+                    timeout: 7200000 // 2 hour timeout
                 });
                 
                 if (response.ok) {

@@ -42,6 +42,9 @@ loginForm.addEventListener('submit', async (e) => {
             throw new Error(data.error || 'Authentication failed');
         }
 
+        // Store token in localStorage
+        localStorage.setItem('nrscAuthToken', data.token);
+
         // Check user role and redirect accordingly
         if (data.user && data.user.role) {
             switch (data.user.role) {
