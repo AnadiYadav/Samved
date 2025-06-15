@@ -123,7 +123,7 @@ async function initializeCharts() {
                     datasets: [{
                         label: 'Questions Count',
                         data: data.counts,
-                        backgroundColor: 'rgba(0, 102, 178, 0.8)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
                         borderWidth: 0
                     }]
                 },
@@ -137,7 +137,7 @@ async function initializeCharts() {
                         x: {
                             ticks: {
                                 maxRotation: 45,
-                                minRotation: 30,
+                                minRotation: 10,
                                 autoSkip: false,
                                 font: {
                                     size: 12
@@ -520,12 +520,14 @@ function updateApprovalChart(pendingCount) {
 async function handleRequestAction(requestId, action) {
     try {
 
+        const token = getAuthToken();
 
         const response = await fetch(`${API_BASE_URL}/knowledge-requests/${requestId}/${action}`, {
             method: 'POST',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             }
         });
 
@@ -932,16 +934,17 @@ function updateProcessingHistory(job) {
 }
 
 // ==================== PROCESSING HISTORY MANAGEMENT ====================
-// ==================== PROCESSING HISTORY MANAGEMENT ====================
-// ==================== PROCESSING HISTORY MANAGEMENT ====================
 async function showProcessingHistory() {
   try {
+
+    const token = getAuthToken();
+
     const response = await fetch(`${API_BASE_URL}/processing-jobs`, {
       method: 'GET',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAuthToken()}`
+        'Authorization': `Bearer ${token}`
       }
     });
     
@@ -1047,11 +1050,14 @@ async function deleteProcessingJob(jobId) {
 
 async function retryProcessingJob(jobId) {
   try {
+
+    const token = getAuthToken();
+
     const response = await fetch(`${API_BASE_URL}/processing-jobs/${jobId}/retry`, {
       method: 'POST',
       credentials: 'include',
       headers: {
-        'Authorization': `Bearer ${getAuthToken()}`
+        'Authorization': `Bearer ${token}`
       }
     });
     

@@ -71,7 +71,20 @@ app.post('/proxy/scrape-pdf-file', async (req, res) => {
   
   try {
     jobId = `pdf-${Date.now()}`;
-    filename = `nrsc-pdf-${Date.now()}.pdf`;
+    
+    // Get original filename from content-disposition header if available
+        let originalFilename = req.headers['content-disposition'] 
+            ? req.headers['content-disposition'].match(/filename="?(.+)"?/)?.[1] 
+            : null;
+
+        // Fallback to timestamp-based name if no original filename
+        filename = originalFilename || `pdf-${Date.now()}.pdf`;
+
+        // Ensure filename is safe and has .pdf extension
+        filename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+        if (!filename.toLowerCase().endsWith('.pdf')) {
+            filename += '.pdf';
+        }
     
     // Track processing start
     await trackPdfProcessing(jobId, filename, 'processing', 'Starting PDF processing');

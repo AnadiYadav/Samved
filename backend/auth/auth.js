@@ -679,8 +679,17 @@ app.post('/api/knowledge-requests',
             message: 'PDF file is required'
           });
         }
-        filePath = req.file.path;
-        content = `PDF:${req.file.filename}`;
+        // Get original filename
+        const originalName = req.file.originalname;
+        
+        // Create new path with original filename
+        const newPath = path.join(uploadDir, originalName);
+        
+        // Rename the file to keep original name
+        fs.renameSync(req.file.path, newPath);
+        
+        filePath = newPath;
+        content = `PDF:${originalName}`; 
       } 
       // Handle text/link content
       else {
@@ -878,7 +887,7 @@ app.post('/api/knowledge-requests/:id/:action',
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ url: requestData.content }),
-                timeout: 3600000 // 1 hour timeout
+                timeout: 7200000 // 2 hour timeout
               });
 
               if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -908,7 +917,8 @@ app.post('/api/knowledge-requests/:id/:action',
                 body: fileBuffer,
                 headers: {
                   'Content-Type': 'application/pdf'
-                }
+                },
+                timeout: 7200000    //2 hours
               });
 
               if (!response.ok) {
@@ -937,14 +947,13 @@ app.post('/api/knowledge-requests/:id/:action',
       console.error('NRSC Request action error:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to process request'
+        message: error.message || 'Failed to process request'
       });
     }
   }
 );
 
 
-// ==================== KNOWLEDGE FILE DOWNLOAD ENDPOINT ====================
 // ==================== KNOWLEDGE FILE DOWNLOAD ENDPOINT ====================
 app.get('/api/knowledge-files/:filename',
   authenticateToken, // Middleware runs first, authenticating the user
@@ -960,7 +969,7 @@ app.get('/api/knowledge-files/:filename',
           message: 'File not found on the server.'
         });
       }
-
+      
       // 2. Since the user is authenticated, we just need to check if a superadmin is accessing it,
       //    or if a regular admin is accessing a file they submitted.
       let hasPermission = false;
