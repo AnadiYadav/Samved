@@ -1,0 +1,580 @@
+{
+  "jobId": "web-1750315023448",
+  "sourceUrl": "https://www.nrsc.gov.in/Knowledge_EBooks",
+  "start_time": "2025-06-19T06:37:06.319Z",
+  "status": "partially_completed",
+  "total": 63,
+  "processed": 63,
+  "successful": [
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-06-19T06:37:12.100Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks#main-content",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-06-19T06:37:15.663Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks#Top",
+      "type": "html",
+      "attempts": 1,
+      "timestamp": "2025-06-19T06:37:19.063Z"
+    }
+  ],
+  "failed": [
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_1_Agriculture.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:37:21.059Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_2_LULC.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:37:21.773Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p1.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:37:23.806Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p2.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:37:26.166Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p3.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:37:32.815Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_4_Soils.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:37:39.545Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_5_Urban.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:37:41.351Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_6_Water_RS.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:37:43.060Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_7_Geosciences.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:37:45.045Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_8_GroundWater.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:37:47.818Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_9_Oceans.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:37:54.616Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_10_Atmosphere.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:02.126Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_11_Cyclones.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:09.770Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_12_FloodDisasterManagement_p1.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:11.434Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_12_FloodDisasterManagement_p2.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:13.191Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_13_AgricultureDroughtMonitoring.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:15.116Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_14_Landslide.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:21.628Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_15_Earthquake.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:23.875Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_16_ForestFireMonitoring.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:26.249Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/RGNationalDrinkingWater_UserManual.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:28.327Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_1_Agriculture.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:29.002Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_2_LULC.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:29.422Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p1.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:29.856Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p2.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:30.271Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p3.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:30.702Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_4_Soils.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:31.135Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_5_Urban.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:36.842Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_6_Water_RS.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:37.838Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_7_Geosciences.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:38.459Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_8_GroundWater.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:38.998Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_9_Oceans.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:44.796Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_10_Atmosphere.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:50.382Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_11_Cyclones.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:50.591Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_12_FloodDisasterManagement_p1.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:56.379Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_12_FloodDisasterManagement_p2.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:38:57.318Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_13_AgricultureDroughtMonitoring.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:02.588Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_14_Landslide.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:02.799Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_15_Earthquake.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:03.218Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_16_ForestFireMonitoring.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:03.457Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/RGNationalDrinkingWater_UserManual.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:04.392Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_1_Agriculture.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:09.686Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_2_LULC.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:15.523Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p1.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:16.398Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p2.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:17.254Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p3.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:18.098Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_4_Soils.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:23.353Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_5_Urban.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:29.206Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_6_Water_RS.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:29.839Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_7_Geosciences.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:30.231Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_8_GroundWater.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:30.751Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_9_Oceans.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:31.166Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_10_Atmosphere.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:31.363Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_11_Cyclones.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:37.065Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_12_FloodDisasterManagement_p1.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:42.303Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_12_FloodDisasterManagement_p2.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:42.701Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_13_AgricultureDroughtMonitoring.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:48.216Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_14_Landslide.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:48.590Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_15_Earthquake.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:54.159Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_16_ForestFireMonitoring.pdf",
+      "type": "pdf",
+      "attempts": 1,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:39:55.341Z"
+    },
+    {
+      "url": "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/RGNationalDrinkingWater_UserManual.pdf",
+      "type": "pdf",
+      "attempts": 2,
+      "error": "404 Not Found - Resource unavailable",
+      "status": "404",
+      "timestamp": "2025-06-19T06:40:00.604Z"
+    }
+  ],
+  "html": [
+    "https://www.nrsc.gov.in/Knowledge_EBooks",
+    "https://www.nrsc.gov.in/Knowledge_EBooks#main-content",
+    "https://www.nrsc.gov.in/Knowledge_EBooks#Top"
+  ],
+  "pdf": [
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_1_Agriculture.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_2_LULC.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p1.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p2.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p3.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_4_Soils.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_5_Urban.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_6_Water_RS.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_7_Geosciences.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_8_GroundWater.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_9_Oceans.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_10_Atmosphere.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_11_Cyclones.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_12_FloodDisasterManagement_p1.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_12_FloodDisasterManagement_p2.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_13_AgricultureDroughtMonitoring.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_14_Landslide.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_15_Earthquake.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_16_ForestFireMonitoring.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/RGNationalDrinkingWater_UserManual.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_1_Agriculture.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_2_LULC.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p1.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p2.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p3.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_4_Soils.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_5_Urban.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_6_Water_RS.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_7_Geosciences.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_8_GroundWater.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_9_Oceans.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_10_Atmosphere.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_11_Cyclones.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_12_FloodDisasterManagement_p1.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_12_FloodDisasterManagement_p2.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_13_AgricultureDroughtMonitoring.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_14_Landslide.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_15_Earthquake.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_16_ForestFireMonitoring.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/RGNationalDrinkingWater_UserManual.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_1_Agriculture.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_2_LULC.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p1.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p2.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_3_ForestVegetation_p3.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_4_Soils.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_5_Urban.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_6_Water_RS.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_7_Geosciences.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_8_GroundWater.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_9_Oceans.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_10_Atmosphere.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_11_Cyclones.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_12_FloodDisasterManagement_p1.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_12_FloodDisasterManagement_p2.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_13_AgricultureDroughtMonitoring.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_14_Landslide.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_15_Earthquake.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/Chap_16_ForestFireMonitoring.pdf",
+    "https://www.nrsc.gov.in/Knowledge_EBooks/sites/default/files/pdf/ebooks/RGNationalDrinkingWater_UserManual.pdf"
+  ],
+  "message": "Processed with 60 failures/skips",
+  "type": "web",
+  "end_time": "2025-06-19T06:40:00.605Z"
+}

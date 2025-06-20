@@ -195,8 +195,8 @@ app.post('/proxy/initiate-processing', async (req, res) => {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ url }),
       dispatcher: new Undici.Agent({
-        headersTimeout: 7200000, // 2 hours
-        bodyTimeout: 7200000     // 2 hours
+        headersTimeout: 18000000, // 5 hours
+        bodyTimeout: 18000000     // 5 hours
       })
     });
 
@@ -278,7 +278,7 @@ async function processLinks(jobId, filePath) {
                 attempts++;
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 3600000);
+                    const timeoutId = setTimeout(() => controller.abort(), 7200000);  //2 hours
 
                     const bodyData = JSON.stringify({
                         url,
@@ -301,8 +301,8 @@ async function processLinks(jobId, filePath) {
                         body: bodyData,
                         signal: controller.signal,
                         dispatcher: new Undici.Agent({
-                            headersTimeout: 3600000,
-                            bodyTimeout: 3600000
+                            headersTimeout: 7200000,  //2 hours
+                            bodyTimeout: 7200000
                         })
                     });
 
@@ -313,7 +313,7 @@ async function processLinks(jobId, filePath) {
                         success = true;
                         consecutiveFailures = 0; // Reset on success
                         console.log(`✅ Successfully processed ${type.toUpperCase()}`);
-                    } else if (response.status === 404) {
+                    } else if (response.status === 500) {
                         // Handle 404 errors specifically
                         is404Error = true;
                         errorMessage = `404 Not Found - Resource unavailable`;
@@ -350,6 +350,23 @@ async function processLinks(jobId, filePath) {
             }
             
             const url = jobData.html[i];
+
+            // Skip non-HTTP URLs
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                jobData.failed.push({
+                    url,
+                    type: 'html',
+                    attempts: 0,
+                    error: 'Skipped - Invalid URL protocol',
+                    status: 'invalid_protocol',
+                    timestamp: new Date().toISOString()
+                });
+                jobData.processed = jobData.successful.length + jobData.failed.length;
+                fs.writeFileSync(filePath, JSON.stringify(jobData, null, 2));
+                console.log(`🚫 Skipped non-HTTP URL: ${url}`);
+                continue;
+            }
+
             const result = await processLink(url, 'html');
             
             if (result.success) {
@@ -399,6 +416,23 @@ async function processLinks(jobId, filePath) {
                 }
                 
                 const url = jobData.pdf[i];
+
+                //  Skip non-HTTP URLs
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    jobData.failed.push({
+                        url,
+                        type: 'pdf',
+                        attempts: 0,
+                        error: 'Skipped - Invalid URL protocol',
+                        status: 'invalid_protocol',
+                        timestamp: new Date().toISOString()
+                    });
+                    jobData.processed = jobData.successful.length + jobData.failed.length;
+                    fs.writeFileSync(filePath, JSON.stringify(jobData, null, 2));
+                    console.log(`🚫 Skipped non-HTTP URL: ${url}`);
+                    continue;
+                }
+
                 const result = await processLink(url, 'pdf');
                 
                 if (result.success) {
@@ -450,14 +484,21 @@ async function processLinks(jobId, filePath) {
         
         jobData.end_time = new Date().toISOString();
         fs.writeFileSync(filePath, JSON.stringify(jobData, null, 2));
+
+
+        // NEW: Categorize different failure types
+        const failed404 = jobData.failed.filter(f => f.status === '404');
+        const failedInvalidProtocol = jobData.failed.filter(f => f.status === 'invalid_protocol');
+        const failedOther = jobData.failed.filter(f => f.status !== '404' && f.status !== 'invalid_protocol');
         
         // Show final progress bar
         const finalProgressBar = renderProgressBar(jobData.processed, jobData.total);
         console.log(`\n[${jobId}] ${finalProgressBar} JOB ${jobData.status.toUpperCase()}`);
         console.log(`📝 Message: ${jobData.message}`);
         console.log(`✅ Successful: ${jobData.successful.length}`);
-        console.log(`🚫 404 Skipped: ${jobData.failed.filter(f => f.status === '404').length}`);
-        console.log(`❌ Failed: ${jobData.failed.filter(f => f.status !== '404').length}`);
+        console.log(`🚫 404 Skipped: ${failed404.length}`);
+        console.log(`🔗 Invalid Protocol: ${failedInvalidProtocol.length}`);
+        console.log(`❌ Failed: ${failedOther.length}`);
         console.log(`📁 Log file preserved at: ${filePath}`);
 
     } catch (error) {
@@ -584,7 +625,7 @@ cron.schedule('0 0 * * *', () => {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ url: entry.url }),
-                    timeout: 7200000 // 2 hour timeout
+                    timeout: 18000000 // 5 hour timeout
                 });
                 
                 if (response.ok) {

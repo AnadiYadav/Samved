@@ -189,12 +189,23 @@
 }
 
 /* ========== Message Bubbles ========== */
+/* ========== Message Bubbles ========== */
 .message {
     max-width: 80%;
     padding: 1rem 1.5rem;
     border-radius: 1.5rem;
     line-height: 1.4;
     animation: messageAppear 0.3s ease;
+    overflow-wrap: break-word;  /* Force text wrapping */
+    word-break: break-word;    /* Break long words */
+}
+
+/* Add link wrapping specifically for citations */
+.bot-message a {
+    display: inline-block;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-all;
 }
 .retry-notice {
     color: #666;

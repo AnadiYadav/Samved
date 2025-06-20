@@ -373,13 +373,22 @@ async function handleKnowledgeSubmission(e) {
 
     try {
         const token = getAuthToken();
+        
+        const controller = new AbortController();
+        
+        // Set timeout (8 minutes)
+        const timeoutId = setTimeout(() => controller.abort(), 480000);
+
         const response = await fetch(`${API_BASE_URL}/knowledge-requests`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
             },
-            body: formData
+            body: formData,
+            signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -391,7 +400,15 @@ async function handleKnowledgeSubmission(e) {
         loadPendingRequests();
     } catch (error) {
         console.error('Submission Error:', error);
-        alert(`NRSC Error: ${error.message}`);
+        let userMessage = 'NRSC: Failed to process request';
+        
+        if (error.name === 'AbortError') {
+            userMessage = 'NRSC: Request timed out. The file might be too large.';
+        } else if (error.message.includes('network')) {
+            userMessage = 'NRSC: Network error. Please check your connection.';
+        }
+        
+        alert(userMessage);
     }
 }
 
