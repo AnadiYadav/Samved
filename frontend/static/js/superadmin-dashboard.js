@@ -786,6 +786,59 @@ function toggleRequestDetails(requestId, element) {
 }
 
 
+//================Show Queries Modal===================================
+
+function showQueriesModal() {
+    document.getElementById('queriesModal').style.display = 'block';
+    loadRecentQueries();
+}
+
+// Close Queries Modal
+function closeQueriesModal() {
+    document.getElementById('queriesModal').style.display = 'none';
+}
+
+// Load recent queries from backend
+async function loadRecentQueries() {
+    try {
+        const token = getAuthToken();
+        const response = await fetch(`${API_BASE_URL}/superadmin/recent-queries`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch queries');
+        
+        const { queries } = await response.json();
+        const tbody = document.getElementById('queriesBody');
+        const countElement = document.getElementById('queryCount');
+        
+        // Update count
+        countElement.textContent = queries.length;
+        
+        // Populate table
+        tbody.innerHTML = queries.map(query => `
+            <tr>
+                <td>${escapeHtml(query.query)}</td>
+                <td>${new Date(query.time).toLocaleString('en-IN')}</td>
+            </tr>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Query load error:', error);
+        alert('Failed to load queries: ' + error.message);
+    }
+}
+
+// Basic XSS protection
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+
 // ==================== TOTAL QUERIES HANDLER ====================
 async function loadTotalQueries() {
     const totalElement = document.getElementById('dailyQueries');

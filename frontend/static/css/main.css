@@ -137,6 +137,12 @@
 .chat-header h3 {
     margin: 0;
     font-size: 1.2rem;
+    flex:1;
+}
+
+.chat-header-buttons {
+    display: flex;
+    gap: 1px;
 }
 
 /* Chat Body with Scrollable Messages */
@@ -188,7 +194,6 @@
     transform: scale(1.05);
 }
 
-/* ========== Message Bubbles ========== */
 /* ========== Message Bubbles ========== */
 .message {
     max-width: 80%;
@@ -265,11 +270,66 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.2rem;
 }
 .minimize-btn:hover {
     background: #005699;
     transform: rotate(180deg);
 }
+
+/* ========== MAXIMIZED CHAT WINDOW ========== */
+.chat-window.maximized {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100% !important;
+    min-height: 100% !important;
+    bottom: auto !important;
+    right: auto !important;
+    border-radius: 0 !important;
+    transform: none !important;
+    z-index: 9999 !important;
+    box-shadow: none !important;
+}
+
+.chat-window.maximized .chat-header {
+    border-radius: 0;
+    padding: 15px 20px;
+}
+
+.chat-window.maximized .chat-body {
+    height: calc(100vh - 120px) !important;
+    max-height: none !important;
+}
+
+.chat-window.maximized .chat-input {
+    padding: 15px 20px;
+}
+
+/* Maximize button styling */
+.maximize-btn {
+    background: var(--isro-blue);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    font-size: 1.2rem;
+}
+
+.maximize-btn:hover {
+    background: #005699;
+    transform: scale(1.1);
+}
+
 
 /* ========== Responsive Design ========== */
 @media (max-width: 768px) {

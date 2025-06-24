@@ -727,6 +727,58 @@ th {
   color: white;
 }
 
+/* Queries Modal Styles */
+#queriesModal .modal-content {
+    max-width: 800px;
+    max-height: 80vh;
+}
+
+#queriesModal .nrsc-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#queriesModal .nrsc-table th {
+    background: var(--isro-blue);
+    color: white;
+    padding: 12px 15px;
+    text-align: left;
+    position: sticky;
+    top: 0;
+}
+
+#queriesModal .nrsc-table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+#queriesModal .nrsc-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+#queriesModal .nrsc-table tr:hover {
+    background-color: #e9f7fe;
+}
+
+#queriesModal .modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-top: 1px solid #ddd;
+}
+
+#queriesModal .modal-footer p {
+    margin: 0;
+    font-weight: 500;
+    color: var(--isro-dark);
+}
+
+#queriesModal .modal-footer span {
+    font-weight: bold;
+    color: var(--isro-blue);
+}
+
 
 /* Responsive Design */
 @media (max-width: 1200px) {

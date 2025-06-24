@@ -433,6 +433,52 @@ app.get('/api/admin/total-queries',
 });
 
 
+// ==================== SUPERADMIN RECENT QUERIES ENDPOINT ====================
+app.get('/api/superadmin/recent-queries', 
+  authenticateToken,
+  requireRole('superadmin'),
+  async (req, res) => {
+    try {
+        // Fetch query data from analytics service
+        const response = await fetch('http://0.0.0.0:7860/number-of-queries');
+        const { nqueries } = await response.json();
+        
+        // Extract and parse queries
+        let queries = [];
+        if (Array.isArray(nqueries) && nqueries.length > 0) {
+            // Parse each query string to JSON
+            queries = nqueries.map(q => {
+                try {
+                    return JSON.parse(q);
+                } catch (e) {
+                    console.error('Error parsing query:', q, e);
+                    return null;
+                }
+            }).filter(q => q !== null); // Filter out invalid entries
+            
+            // Sort by time (newest first)
+            queries.sort((a, b) => new Date(b.time) - new Date(a.time));
+            
+            // Get latest 200 queries
+            queries = queries.slice(0, 200);
+        }
+        
+        res.json({
+            success: true,
+            queries
+        });
+        
+    } catch (error) {
+        console.error('Recent queries error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch recent queries'
+        });
+    }
+});
+
+
+
 // ==================== PROTECTED ENDPOINTS ====================
 
 // ==================== ADMIN DATA ENDPOINT ====================

@@ -77,6 +77,9 @@
                 <button class="btn-primary" onclick="showInformationForm()">
                     <span>+</span> Add New Information
                 </button>
+                <button class="btn-primary" onclick="showQueriesModal()">
+                    Show Queries
+                </button>
             </div>
             
             <!-- Pending Requests Table -->
@@ -125,6 +128,36 @@
                 </div>
             </div>
         </div>
+
+
+        <!-- Queries Modal -->
+        <div id="queriesModal" class="nrsc-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>📋 Recent User Queries</h2>
+                    <span class="close-modal" onclick="closeQueriesModal()">&times;</span>
+                </div>
+                
+                <div class="modal-body scroll-container">
+                    <table class="nrsc-table">
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Date & Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queriesBody">
+                            <!-- Dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="modal-footer">
+                    <p>Showing latest <span id="queryCount">0</span> queries</p>
+                </div>
+            </div>
+        </div>
+
 
         </section>
     </main>

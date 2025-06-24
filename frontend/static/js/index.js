@@ -43,9 +43,48 @@ clickHead.addEventListener('dblclick', () => {
 
 /** Toggle chat window visibility */
 function toggleChat() {
+
+        // Always exit maximized mode when minimizing
+    if (chatWindow.classList.contains('maximized')) {
+        chatWindow.classList.remove('maximized');
+        document.body.style.overflow = '';
+        const maximizeBtn = document.querySelector('.maximize-btn');
+        if (maximizeBtn) maximizeBtn.textContent = '□';
+    }
+
         isChatOpen = !isChatOpen;
         chatWindow.classList.toggle('active', isChatOpen);
         welcomeBubble.classList.toggle('visible', !isChatOpen);
+}
+
+/** Toggle chat window maximization */
+function toggleMaximize() {
+    const isMaximized = chatWindow.classList.toggle('maximized');
+    
+    // Update button icon
+    const maximizeBtn = document.querySelector('.maximize-btn');
+    if (maximizeBtn) 
+        {
+            maximizeBtn.textContent = isMaximized ? '❐' : '□';
+            maximizeBtn.style.background='#FF671F';
+        }
+    
+    
+    // When maximizing, also open chat if closed
+    if (!isChatOpen && isMaximized) {
+        isChatOpen = true;
+        chatWindow.classList.add('active');
+        welcomeBubble.classList.remove('visible');
+    }
+    
+    // Scroll to bottom when maximizing
+    if (isMaximized) {
+        const chatBody = document.getElementById('chatBody');
+        if (chatBody) chatBody.scrollTop = chatBody.scrollHeight;
+    }
+    
+    // Prevent body scrolling when maximized
+    document.body.style.overflow = isMaximized ? 'hidden' : '';
 }
 
 
