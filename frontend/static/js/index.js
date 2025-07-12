@@ -189,9 +189,34 @@ async function sendMessage() {
 }
 
 /** Markdown formatting helper */
+/** Markdown formatting helper */
 function formatBotResponse(text) {
-    // Convert markdown to HTML
-    let formattedText = escapeHtml(text)
+    // First escape HTML to prevent XSS
+    let formattedText = escapeHtml(text);
+    
+    // Convert URLs to clickable links
+    formattedText = formattedText.replace(
+        /(?:<(\s*))?(\b(?:https?|ftp|file):\/\/[^\s<>"']+)(\s*>)?/ig,
+        (match, prefixSpaces, url, suffix) => {
+            // Remove ONE trailing non-URL character if present
+            let cleanUrl = url;
+            if (/[.,;:!?)\]}>]/.test(cleanUrl.slice(-1))) {
+                cleanUrl = cleanUrl.slice(0, -1);
+            }
+            
+            // Create styled link
+            const link = `<a href="${cleanUrl}" target="_blank" style="color: var(--isro-blue); text-decoration: underline;">${cleanUrl}</a>`;
+            
+            // Handle surrounding context
+            const openingSpace = prefixSpaces || '';
+            const closingSpace = suffix ? suffix.replace(/>/g, '') : '';
+            
+            return openingSpace + link + closingSpace;
+        }
+    );
+    
+    // Then apply other markdown formatting
+    formattedText = formattedText
         // Headings
         .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
         .replace(/^##\s+(.+)$/gm, '<h2>$1</h2>')
@@ -199,7 +224,7 @@ function formatBotResponse(text) {
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         // Italics
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        // Links
+        // Markdown links
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
         // Line breaks
         .replace(/\n/g, '<br>');

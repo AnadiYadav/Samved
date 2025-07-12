@@ -313,7 +313,7 @@ async function processLinks(jobId, filePath) {
                         success = true;
                         consecutiveFailures = 0; // Reset on success
                         console.log(`✅ Successfully processed ${type.toUpperCase()}`);
-                    } else if (response.status === 500) {
+                    } else if (response.status ===404) {
                         // Handle 404 errors specifically
                         is404Error = true;
                         errorMessage = `404 Not Found - Resource unavailable`;

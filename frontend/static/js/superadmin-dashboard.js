@@ -382,6 +382,7 @@ function initializeFallbackChart() {
 }
 
 
+
 // Load Active Sessions 
 async function loadActiveSessions() {
     try {
