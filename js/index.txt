@@ -36,10 +36,6 @@ function generateSessionId() {
   }
 
 // Temporarily open Admin Login Page (double click header)
-const clickHead = document.getElementById('click-head');
-clickHead.addEventListener('dblclick', () => {
-    window.location.href = '/frontend/templates/admin-login.html';
-});
 
 /** Toggle chat window visibility */
 function toggleChat() {
@@ -94,15 +90,11 @@ async function sendMessage() {
     const message = input.value.trim();
     if (!message) return;
 
-    // Disable UI during processing
-    const sendButton = document.querySelector('.send-btn');
-    input.disabled = true;
-    sendButton.disabled = true;
 
     if (!sessionId) {
         sessionId = generateSessionId();
         try {
-            await fetch(`http://localhost:3000/api/session-start`, {
+            await fetch(`http://192.168.120.175:3000/api/session-start`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -130,7 +122,7 @@ async function sendMessage() {
         // CORS proxy configuration
         const proxyUrl = 'https://api.allorigins.win/raw?url=';
         const targetUrl = encodeURIComponent('https://7860-01jsbrn78sydwxvkhr021tsz56.cloudspaces.litng.ai/ask');
-        const apiUrl = 'http://localhost:3001/proxy/ask';
+        const apiUrl = 'http://192.168.120.175:3001/proxy/ask';
         const requestData = {
             query: message,
             session_id: sessionId
@@ -141,7 +133,7 @@ async function sendMessage() {
             headers: {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                'Origin': 'http://localhost:5500'  // Match your development origin
+                'Origin': 'http://192.168.120.175:5500'  // Match your development origin
             },
             body: JSON.stringify(requestData)
         });
@@ -183,20 +175,16 @@ async function sendMessage() {
         
         chatBody.innerHTML += `
             <div class="message bot-message error-message">
-                ⚠️ Service Error: Our Server is busy.<br>
-                <small>Please try after some time.</small>
+                ⚠️ Service Error: ${escapeHtml(error.message)}<br>
+                <small>Try refreshing or contact support</small>
             </div>
         `;
-    } finally {
-        // Re-enable UI after processing
-        input.disabled = false;
-        sendButton.disabled = false;
-        input.focus();
     }
     
     chatBody.scrollTop = chatBody.scrollHeight;
 }
 
+/** Markdown formatting helper */
 /** Markdown formatting helper */
 function formatBotResponse(text) {
     // First escape HTML to prevent XSS
@@ -267,10 +255,7 @@ function escapeHtml(text) {
 function handleEnter(event) {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
-        const sendButton = document.querySelector('.send-btn');
-        if (!sendButton.disabled) {
-            sendMessage();
-        }
+        sendMessage();
     }
 }
 (function () {
