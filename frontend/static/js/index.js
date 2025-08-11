@@ -4,7 +4,6 @@
  */
 
 // API Configuration
-const API_BASE_URL = 'https://8888-01js1h540pyys2dz7kcae1fbk9.cloudspaces.litng.ai';
 let sessionId = null;
 // localStorage.setItem('sessionId', sessionId);
 
@@ -35,11 +34,6 @@ function generateSessionId() {
     return newId;
   }
 
-// Temporarily open Admin Login Page (double click header)
-const clickHead = document.getElementById('click-head');
-clickHead.addEventListener('dblclick', () => {
-    window.location.href = '/frontend/templates/admin-login.html';
-});
 
 /** Toggle chat window visibility */
 function toggleChat() {
@@ -156,6 +150,7 @@ async function sendMessage() {
         }
 
         const responseData = await response.json();
+        
         let botResponse = responseData.response || 
                 responseData.answer || 
                 responseData.message || 
@@ -197,47 +192,38 @@ async function sendMessage() {
     chatBody.scrollTop = chatBody.scrollHeight;
 }
 
-/** Markdown formatting helper */
+/**
+ * Markdown and HTML formatting helper.
+ * Converts Markdown to HTML and then sanitizes it for security.
+ */
 function formatBotResponse(text) {
-    // First escape HTML to prevent XSS
-    let formattedText = escapeHtml(text);
-    
-    // Convert URLs to clickable links
-    formattedText = formattedText.replace(
-        /(?:<(\s*))?(\b(?:https?|ftp|file):\/\/[^\s<>"']+)(\s*>)?/ig,
-        (match, prefixSpaces, url, suffix) => {
-            // Remove ONE trailing non-URL character if present
-            let cleanUrl = url;
-            if (/[.,;:!?)\]}>]/.test(cleanUrl.slice(-1))) {
-                cleanUrl = cleanUrl.slice(0, -1);
-            }
-            
-            // Create styled link
-            const link = `<a href="${cleanUrl}" target="_blank" style="color: var(--isro-blue); text-decoration: underline;">${cleanUrl}</a>`;
-            
-            // Handle surrounding context
-            const openingSpace = prefixSpaces || '';
-            const closingSpace = suffix ? suffix.replace(/>/g, '') : '';
-            
-            return openingSpace + link + closingSpace;
-        }
-    );
-    
-    // Then apply other markdown formatting
-    formattedText = formattedText
-        // Headings
-        .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
+    // Step 1: Convert all known Markdown syntax to HTML.
+    // The order is important: process block elements (like headings) before inline elements.
+    let formattedText = text
+        // Headings (e.g., ## Title, ### Subtitle)
         .replace(/^##\s+(.+)$/gm, '<h2>$1</h2>')
-        // Bold
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        // Italics
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        // Markdown links
+        .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
+
+        // Markdown links (e.g., [About ISRO](https://...))
+        // This will create a standard <a> tag.
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-        // Line breaks
+
+        // Bold and Italics (e.g., **bold**, *italic*)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+
+        // Newlines (for paragraph breaks)
         .replace(/\n/g, '<br>');
 
-    return formattedText;
+    // Step 2: Sanitize the generated HTML with DOMPurify.
+    // This is a critical security step. It ensures that only the safe HTML we
+    // created above is rendered, and strips anything potentially malicious.
+    const cleanHtml = DOMPurify.sanitize(formattedText, {
+        USE_PROFILES: { html: true }, // Allows safe tags like h2, h3, a, strong, br
+        ADD_ATTR: ['target'],       // Specifically allows the 'target' attribute for opening links in a new tab
+    });
+
+    return cleanHtml;
 }
 
 /** Add loading indicator */
